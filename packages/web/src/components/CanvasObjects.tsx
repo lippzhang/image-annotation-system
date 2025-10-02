@@ -1,6 +1,7 @@
-import React from 'react';
-import { Rect, Circle, Line, Text, Arrow, Group } from 'react-konva';
+import React, { useRef, useEffect } from 'react';
+import { Rect, Circle, Line, Text, Arrow, Group, Transformer } from 'react-konva';
 import { AnnotationObject } from '../types';
+import Konva from 'konva';
 
 interface CanvasObjectsProps {
   objects: AnnotationObject[];
@@ -15,12 +16,63 @@ const CanvasObjects: React.FC<CanvasObjectsProps> = ({
   onObjectSelect,
   onObjectUpdate,
 }) => {
+  const transformerRef = useRef<Konva.Transformer>(null);
+  const shapeRefs = useRef<{ [key: string]: Konva.Node }>({});
+
+  // 当选中对象改变时，更新Transformer
+  useEffect(() => {
+    if (transformerRef.current) {
+      const selectedNodes = selectedObjects.map(id => shapeRefs.current[id]).filter(Boolean);
+      transformerRef.current.nodes(selectedNodes);
+      transformerRef.current.getLayer()?.batchDraw();
+    }
+  }, [selectedObjects]);
+
   const handleDragEnd = (id: string, e: any) => {
     if (onObjectUpdate) {
+      const node = e.target;
       onObjectUpdate(id, {
-        x: e.target.x(),
-        y: e.target.y(),
+        x: node.x(),
+        y: node.y(),
       });
+    }
+  };
+
+  const handleTransformEnd = (id: string, e: any) => {
+    if (onObjectUpdate) {
+      const node = e.target;
+      const scaleX = node.scaleX();
+      const scaleY = node.scaleY();
+      
+      // 重置缩放并更新实际尺寸
+      node.scaleX(1);
+      node.scaleY(1);
+      
+      const obj = objects.find(o => o.id === id);
+      if (!obj) return;
+
+      if (obj.type === 'rectangle') {
+        onObjectUpdate(id, {
+          x: node.x(),
+          y: node.y(),
+          width: Math.max(5, (obj.width || 0) * scaleX),
+          height: Math.max(5, (obj.height || 0) * scaleY),
+        });
+      } else if (obj.type === 'circle') {
+        const newRadius = Math.max(5, Math.abs(obj.width || 0) / 2 * Math.max(scaleX, scaleY));
+        onObjectUpdate(id, {
+          x: node.x(),
+          y: node.y(),
+          width: newRadius * 2,
+          height: newRadius * 2,
+        });
+      } else if (obj.type === 'text') {
+        onObjectUpdate(id, {
+          x: node.x(),
+          y: node.y(),
+          fontSize: Math.max(8, (obj.fontSize || 16) * Math.max(scaleX, scaleY)),
+        });
+      }
     }
   };
 
@@ -31,8 +83,15 @@ const CanvasObjects: React.FC<CanvasObjectsProps> = ({
       stroke: obj.stroke || '#1890ff',
       strokeWidth: obj.strokeWidth || 2,
       onClick: () => onObjectSelect(obj.id),
+      onTap: () => onObjectSelect(obj.id),
       draggable: true,
       onDragEnd: (e: any) => handleDragEnd(obj.id, e),
+      onTransformEnd: (e: any) => handleTransformEnd(obj.id, e),
+      ref: (node: any) => {
+        if (node) {
+          shapeRefs.current[obj.id] = node;
+        }
+      },
     };
 
     switch (obj.type) {
@@ -63,6 +122,7 @@ const CanvasObjects: React.FC<CanvasObjectsProps> = ({
             key={`line-group-${obj.id}`}
             draggable={true}
             onClick={() => onObjectSelect(obj.id)}
+            onTap={() => onObjectSelect(obj.id)}
             onDragEnd={(e) => {
               if (onObjectUpdate) {
                 const deltaX = e.target.x();
@@ -81,6 +141,11 @@ const CanvasObjects: React.FC<CanvasObjectsProps> = ({
                 
                 e.target.x(0);
                 e.target.y(0);
+              }
+            }}
+            ref={(node: any) => {
+              if (node) {
+                shapeRefs.current[obj.id] = node;
               }
             }}
           >
@@ -107,6 +172,7 @@ const CanvasObjects: React.FC<CanvasObjectsProps> = ({
             key={`arrow-group-${obj.id}`}
             draggable={true}
             onClick={() => onObjectSelect(obj.id)}
+            onTap={() => onObjectSelect(obj.id)}
             onDragEnd={(e) => {
               if (onObjectUpdate) {
                 const deltaX = e.target.x();
@@ -125,6 +191,11 @@ const CanvasObjects: React.FC<CanvasObjectsProps> = ({
                 
                 e.target.x(0);
                 e.target.y(0);
+              }
+            }}
+            ref={(node: any) => {
+              if (node) {
+                shapeRefs.current[obj.id] = node;
               }
             }}
           >
@@ -153,12 +224,18 @@ const CanvasObjects: React.FC<CanvasObjectsProps> = ({
             stroke={obj.stroke || '#1890ff'}
             strokeWidth={obj.strokeWidth || 2}
             onClick={() => onObjectSelect(obj.id)}
+            onTap={() => onObjectSelect(obj.id)}
             draggable={true}
             onDragEnd={(e: any) => handleDragEnd(obj.id, e)}
             points={obj.points || []}
             lineCap="round"
             lineJoin="round"
             tension={0.5}
+            ref={(node: any) => {
+              if (node) {
+                shapeRefs.current[obj.id] = node;
+              }
+            }}
           />
         );
 
@@ -183,6 +260,16 @@ const CanvasObjects: React.FC<CanvasObjectsProps> = ({
   return (
     <>
       {objects.map(obj => renderObject(obj))}
+      <Transformer
+        ref={transformerRef}
+        boundBoxFunc={(oldBox, newBox) => {
+          // 限制最小尺寸
+          if (newBox.width < 5 || newBox.height < 5) {
+            return oldBox;
+          }
+          return newBox;
+        }}
+      />
     </>
   );
 };
