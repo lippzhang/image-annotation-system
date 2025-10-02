@@ -22,6 +22,7 @@ const EmptyCanvas: React.FC<EmptyCanvasProps> = ({ onUploadClick }) => {
         style={{
           display: 'flex',
           alignItems: 'center',
+          justifyContent: 'center',
           gap: '8px',
           padding: '8px 16px',
           border: '1px solid #1890ff',
@@ -30,6 +31,16 @@ const EmptyCanvas: React.FC<EmptyCanvasProps> = ({ onUploadClick }) => {
           color: '#1890ff',
           cursor: 'pointer',
           fontSize: '14px',
+          margin: '0 auto',
+          transition: 'all 0.2s ease',
+        }}
+        onMouseEnter={(e) => {
+          e.currentTarget.style.backgroundColor = '#f0f8ff';
+          e.currentTarget.style.borderColor = '#40a9ff';
+        }}
+        onMouseLeave={(e) => {
+          e.currentTarget.style.backgroundColor = 'white';
+          e.currentTarget.style.borderColor = '#1890ff';
         }}
       >
         <Upload size={16} />

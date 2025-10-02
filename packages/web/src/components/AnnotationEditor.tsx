@@ -209,44 +209,41 @@ const AnnotationEditor: React.FC = () => {
         />
         
         <div className={`canvas-container ${!canvasState.backgroundImage ? 'canvas-grid' : ''}`}>
-          {/* 空状态提示 */}
-          {!canvasState.backgroundImage && (
+          {!canvasState.backgroundImage ? (
             <EmptyCanvas onUploadClick={handleUploadClick} />
-          )}
-          
-          <Stage
-            ref={stageRef}
-            width={stageSize.width}
-            height={stageSize.height}
-            scaleX={canvasState.zoom}
-            scaleY={canvasState.zoom}
-            onMouseDown={handleMouseDown}
-            onMousemove={handleMouseMove}
-            onMouseup={handleMouseUp}
-          >
-            <Layer>
-              {/* 渲染背景图 */}
-              {canvasState.backgroundImage && (
+          ) : (
+            <Stage
+              ref={stageRef}
+              width={stageSize.width}
+              height={stageSize.height}
+              scaleX={canvasState.zoom}
+              scaleY={canvasState.zoom}
+              onMouseDown={handleMouseDown}
+              onMousemove={handleMouseMove}
+              onMouseup={handleMouseUp}
+            >
+              <Layer>
+                {/* 渲染背景图 */}
                 <BackgroundImage backgroundImage={canvasState.backgroundImage} />
-              )}
-              
-              {/* 渲染标注对象 */}
-              <CanvasObjects
-                objects={canvasState.objects}
-                selectedObjects={canvasState.selectedObjects}
-                onObjectSelect={handleObjectSelect}
-              />
-              
-              {/* 渲染当前正在绘制的对象 */}
-              {currentDrawing && (
+                
+                {/* 渲染标注对象 */}
                 <CanvasObjects
-                  objects={[currentDrawing]}
-                  selectedObjects={[]}
-                  onObjectSelect={() => {}}
+                  objects={canvasState.objects}
+                  selectedObjects={canvasState.selectedObjects}
+                  onObjectSelect={handleObjectSelect}
                 />
-              )}
-            </Layer>
-          </Stage>
+                
+                {/* 渲染当前正在绘制的对象 */}
+                {currentDrawing && (
+                  <CanvasObjects
+                    objects={[currentDrawing]}
+                    selectedObjects={[]}
+                    onObjectSelect={() => {}}
+                  />
+                )}
+              </Layer>
+            </Stage>
+          )}
         </div>
         
         <PropertiesPanel
