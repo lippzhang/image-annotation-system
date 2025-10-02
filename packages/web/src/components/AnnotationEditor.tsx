@@ -33,43 +33,50 @@ const AnnotationEditor: React.FC = () => {
       const container = document.querySelector('.canvas-container');
       if (container) {
         const rect = container.getBoundingClientRect();
-        const newSize = {
+        setStageSize({
           width: rect.width,
           height: rect.height,
-        };
-        setStageSize(newSize);
-        
-        // 如果有背景图，重新计算居中位置
-        if (canvasState.backgroundImage) {
-          const img = canvasState.backgroundImage.image;
-          const scaleX = newSize.width / img.width;
-          const scaleY = newSize.height / img.height;
-          const scale = Math.min(scaleX, scaleY, 1);
-          
-          const scaledWidth = img.width * scale;
-          const scaledHeight = img.height * scale;
-          
-          const x = (newSize.width - scaledWidth) / 2;
-          const y = (newSize.height - scaledHeight) / 2;
-          
-          setCanvasState(prev => ({
-            ...prev,
-            backgroundImage: {
-              ...prev.backgroundImage!,
-              x: x,
-              y: y,
-              scaleX: scale,
-              scaleY: scale,
-            }
-          }));
-        }
+        });
       }
     };
 
     updateSize();
     window.addEventListener('resize', updateSize);
     return () => window.removeEventListener('resize', updateSize);
-  }, [canvasState.backgroundImage]);
+  }, []);
+
+  // 当画布尺寸变化时，重新计算背景图居中位置
+  React.useEffect(() => {
+    if (canvasState.backgroundImage) {
+      const img = canvasState.backgroundImage.image;
+      const scaleX = stageSize.width / img.width;
+      const scaleY = stageSize.height / img.height;
+      const scale = Math.min(scaleX, scaleY, 1);
+      
+      const scaledWidth = img.width * scale;
+      const scaledHeight = img.height * scale;
+      
+      const x = (stageSize.width - scaledWidth) / 2;
+      const y = (stageSize.height - scaledHeight) / 2;
+      
+      // 只有当位置或缩放发生变化时才更新
+      if (canvasState.backgroundImage.x !== x || 
+          canvasState.backgroundImage.y !== y || 
+          canvasState.backgroundImage.scaleX !== scale || 
+          canvasState.backgroundImage.scaleY !== scale) {
+        setCanvasState(prev => ({
+          ...prev,
+          backgroundImage: {
+            ...prev.backgroundImage!,
+            x: x,
+            y: y,
+            scaleX: scale,
+            scaleY: scale,
+          }
+        }));
+      }
+    }
+  }, [stageSize.width, stageSize.height, canvasState.backgroundImage?.image]);
 
   // 工具选择
   const handleToolSelect = useCallback((tool: ToolType) => {
@@ -82,11 +89,43 @@ const AnnotationEditor: React.FC = () => {
 
   // 缩放控制
   const handleZoom = useCallback((delta: number) => {
-    setCanvasState(prev => ({
-      ...prev,
-      zoom: Math.max(0.1, Math.min(5, prev.zoom + delta)),
-    }));
-  }, []);
+    const stage = stageRef.current;
+    if (!stage) return;
+
+    setCanvasState(prev => {
+      const oldZoom = prev.zoom;
+      const newZoom = Math.max(0.1, Math.min(5, oldZoom + delta));
+      
+      // 如果缩放比例没有变化，直接返回
+      if (newZoom === oldZoom) return prev;
+      
+      // 获取舞台中心点
+      const centerX = stageSize.width / 2;
+      const centerY = stageSize.height / 2;
+      
+      // 计算当前舞台的位置
+      const currentX = stage.x();
+      const currentY = stage.y();
+      
+      // 计算缩放中心点在世界坐标系中的位置
+      const worldCenterX = (centerX - currentX) / oldZoom;
+      const worldCenterY = (centerY - currentY) / oldZoom;
+      
+      // 计算新的舞台位置，使缩放中心点保持在屏幕中心
+      const newX = centerX - worldCenterX * newZoom;
+      const newY = centerY - worldCenterY * newZoom;
+      
+      // 更新舞台位置
+      stage.x(newX);
+      stage.y(newY);
+      
+      return {
+        ...prev,
+        zoom: newZoom,
+        pan: { x: newX, y: newY }
+      };
+    });
+  }, [stageSize]);
 
   // 背景图加载处理
   const handleImageLoad = useCallback((backgroundImage: BackgroundImageType) => {
@@ -269,9 +308,17 @@ const AnnotationEditor: React.FC = () => {
               height={stageSize.height}
               scaleX={canvasState.zoom}
               scaleY={canvasState.zoom}
+              x={canvasState.pan.x}
+              y={canvasState.pan.y}
               onMouseDown={handleMouseDown}
               onMousemove={handleMouseMove}
               onMouseup={handleMouseUp}
+              onWheel={(e) => {
+                e.evt.preventDefault();
+                const scaleBy = 1.1;
+                const delta = e.evt.deltaY > 0 ? -0.1 : 0.1;
+                handleZoom(delta);
+              }}
             >
               <Layer>
                 {/* 渲染背景图 */}
