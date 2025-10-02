@@ -104,6 +104,27 @@ const CanvasObjects: React.FC<CanvasObjectsProps> = ({
           />
         );
 
+      case 'pen':
+        return (
+          <Line
+            key={obj.id}
+            stroke={obj.stroke || '#1890ff'}
+            strokeWidth={obj.strokeWidth || 2}
+            onClick={() => onObjectSelect(obj.id)}
+            draggable={true}
+            onDragEnd={(e: any) => handleDragEnd(obj.id, e)}
+            points={obj.points || []}
+            lineCap="round"
+            lineJoin="round"
+            tension={0.5}
+            {...(isSelected && {
+              shadowColor: '#1890ff',
+              shadowBlur: 10,
+              shadowOpacity: 0.6,
+            })}
+          />
+        );
+
       case 'text':
         return (
           <Text

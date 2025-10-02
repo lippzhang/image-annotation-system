@@ -195,6 +195,8 @@ const AnnotationEditor: React.FC = () => {
       newObject.height = 0;
     } else if (canvasState.selectedTool === 'line' || canvasState.selectedTool === 'arrow') {
       newObject.points = [adjustedPos.x, adjustedPos.y, adjustedPos.x, adjustedPos.y];
+    } else if (canvasState.selectedTool === 'pen') {
+      newObject.points = [adjustedPos.x, adjustedPos.y];
     } else if (canvasState.selectedTool === 'text') {
       newObject.text = '文本';
       newObject.fontSize = 16;
@@ -226,6 +228,10 @@ const AnnotationEditor: React.FC = () => {
       updatedObject.height = adjustedPos.y - currentDrawing.y;
     } else if (currentDrawing.type === 'line' || currentDrawing.type === 'arrow') {
       updatedObject.points = [currentDrawing.x, currentDrawing.y, adjustedPos.x, adjustedPos.y];
+    } else if (currentDrawing.type === 'pen') {
+      // 画笔工具：将新的点添加到轨迹中
+      const currentPoints = currentDrawing.points || [];
+      updatedObject.points = [...currentPoints, adjustedPos.x, adjustedPos.y];
     }
 
     setCurrentDrawing(updatedObject);
