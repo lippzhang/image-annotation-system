@@ -10,6 +10,7 @@ import {
 } from 'lucide-react';
 import { ToolType, BackgroundImage } from '../types';
 import ImageUploader from './ImageUploader';
+import ImageUrlInput from './ImageUrlInput';
 
 interface ToolbarProps {
   selectedTool: ToolType;
@@ -35,6 +36,7 @@ const Toolbar: React.FC<ToolbarProps> = ({
           <Home size={16} />
         </button>
         <ImageUploader onImageLoad={onImageLoad} fileInputRef={fileInputRef} />
+        <ImageUrlInput onImageLoad={onImageLoad} />
         <button className="toolbar-button" title="下载">
           <Download size={16} />
         </button>
