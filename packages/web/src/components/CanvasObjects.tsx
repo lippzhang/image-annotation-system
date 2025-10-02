@@ -67,10 +67,19 @@ const CanvasObjects: React.FC<CanvasObjectsProps> = ({
         return (
           <Line
             key={obj.id}
-            {...commonProps}
+            stroke={obj.stroke || '#1890ff'}
+            strokeWidth={obj.strokeWidth || 2}
+            onClick={() => onObjectSelect(obj.id)}
+            draggable={true}
+            onDragEnd={(e: any) => handleDragEnd(obj.id, e)}
             points={obj.points || []}
             lineCap="round"
             lineJoin="round"
+            {...(isSelected && {
+              shadowColor: '#1890ff',
+              shadowBlur: 10,
+              shadowOpacity: 0.6,
+            })}
           />
         );
 
@@ -78,11 +87,20 @@ const CanvasObjects: React.FC<CanvasObjectsProps> = ({
         return (
           <Arrow
             key={obj.id}
-            {...commonProps}
+            stroke={obj.stroke || '#1890ff'}
+            strokeWidth={obj.strokeWidth || 2}
+            onClick={() => onObjectSelect(obj.id)}
+            draggable={true}
+            onDragEnd={(e: any) => handleDragEnd(obj.id, e)}
             points={obj.points || []}
             pointerLength={10}
             pointerWidth={10}
             fill={obj.stroke || '#1890ff'}
+            {...(isSelected && {
+              shadowColor: '#1890ff',
+              shadowBlur: 10,
+              shadowOpacity: 0.6,
+            })}
           />
         );
 

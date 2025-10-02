@@ -175,10 +175,10 @@ const AnnotationEditor: React.FC = () => {
     const pos = e.target.getStage()?.getPointerPosition();
     if (!pos) return;
 
-    // 转换坐标，考虑缩放
+    // 转换坐标，考虑缩放和平移
     const adjustedPos = {
-      x: pos.x / canvasState.zoom,
-      y: pos.y / canvasState.zoom,
+      x: (pos.x - canvasState.pan.x) / canvasState.zoom,
+      y: (pos.y - canvasState.pan.y) / canvasState.zoom,
     };
 
     const newObject: AnnotationObject = {
@@ -213,10 +213,10 @@ const AnnotationEditor: React.FC = () => {
     const pos = e.target.getStage()?.getPointerPosition();
     if (!pos) return;
 
-    // 转换坐标，考虑缩放
+    // 转换坐标，考虑缩放和平移
     const adjustedPos = {
-      x: pos.x / canvasState.zoom,
-      y: pos.y / canvasState.zoom,
+      x: (pos.x - canvasState.pan.x) / canvasState.zoom,
+      y: (pos.y - canvasState.pan.y) / canvasState.zoom,
     };
 
     const updatedObject = { ...currentDrawing };
@@ -229,7 +229,7 @@ const AnnotationEditor: React.FC = () => {
     }
 
     setCurrentDrawing(updatedObject);
-  }, [isDrawing, currentDrawing, canvasState.zoom]);
+  }, [isDrawing, currentDrawing, canvasState.zoom, canvasState.pan]);
 
   // 鼠标抬起事件
   const handleMouseUp = useCallback(() => {
