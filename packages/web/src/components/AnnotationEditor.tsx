@@ -161,6 +161,47 @@ const AnnotationEditor: React.FC = () => {
     fileInputRef.current?.click();
   }, []);
 
+  // 下载画布内容
+  const handleDownload = useCallback(() => {
+    const stage = stageRef.current;
+    if (!stage) return;
+
+    try {
+      // 临时重置缩放和平移，获取原始尺寸的图片
+      const originalZoom = canvasState.zoom;
+      const originalPan = canvasState.pan;
+      
+      stage.scaleX(1);
+      stage.scaleY(1);
+      stage.x(0);
+      stage.y(0);
+      
+      // 生成图片
+      const dataURL = stage.toDataURL({
+        mimeType: 'image/png',
+        quality: 1,
+        pixelRatio: 2, // 高清图片
+      });
+      
+      // 恢复原始缩放和平移
+      stage.scaleX(originalZoom);
+      stage.scaleY(originalZoom);
+      stage.x(originalPan.x);
+      stage.y(originalPan.y);
+      
+      // 创建下载链接
+      const link = document.createElement('a');
+      link.download = `annotation-${new Date().toISOString().slice(0, 19).replace(/:/g, '-')}.png`;
+      link.href = dataURL;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    } catch (error) {
+      console.error('下载失败:', error);
+      alert('下载失败，请重试');
+    }
+  }, [canvasState.zoom, canvasState.pan]);
+
   // 鼠标按下事件
   const handleMouseDown = useCallback((e: Konva.KonvaEventObject<MouseEvent>) => {
     // 如果没有背景图，不允许标注
@@ -291,6 +332,7 @@ const AnnotationEditor: React.FC = () => {
         zoom={canvasState.zoom}
         onZoom={handleZoom}
         onImageLoad={handleImageLoad}
+        onDownload={handleDownload}
         fileInputRef={fileInputRef}
       />
       

@@ -18,6 +18,7 @@ interface ToolbarProps {
   zoom: number;
   onZoom: (delta: number) => void;
   onImageLoad: (backgroundImage: BackgroundImage) => void;
+  onDownload: () => void;
   fileInputRef?: React.RefObject<HTMLInputElement>;
 }
 
@@ -27,6 +28,7 @@ const Toolbar: React.FC<ToolbarProps> = ({
   zoom,
   onZoom,
   onImageLoad,
+  onDownload,
   fileInputRef,
 }) => {
   return (
@@ -37,7 +39,7 @@ const Toolbar: React.FC<ToolbarProps> = ({
         </button>
         <ImageUploader onImageLoad={onImageLoad} fileInputRef={fileInputRef} />
         <ImageUrlInput onImageLoad={onImageLoad} />
-        <button className="toolbar-button" title="下载">
+        <button className="toolbar-button" title="下载" onClick={onDownload}>
           <Download size={16} />
         </button>
       </div>
