@@ -21,9 +21,9 @@ const ImageUploader: React.FC<ImageUploaderProps> = ({ onImageLoad, fileInputRef
       return;
     }
 
-    // 检查文件大小（限制为10MB）
-    if (file.size > 10 * 1024 * 1024) {
-      alert('图片文件大小不能超过10MB');
+    // 检查文件大小（限制为50MB）
+    if (file.size > 50 * 1024 * 1024) {
+      alert('图片文件大小不能超过50MB');
       return;
     }
 
