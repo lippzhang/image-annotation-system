@@ -83,8 +83,11 @@ const AnnotationEditor: React.FC = () => {
     // 如果没有背景图，不允许标注
     if (!canvasState.backgroundImage) return;
     
-    // 如果点击的是背景图或者是选择工具，不创建新对象
-    if (canvasState.selectedTool === 'select' || e.target === e.target.getStage()) return;
+    // 如果是选择工具，不创建新对象
+    if (canvasState.selectedTool === 'select') return;
+    
+    // 如果点击的是已存在的标注对象，不创建新对象
+    if (e.target !== e.target.getStage() && e.target.getClassName() !== 'Image') return;
 
     const pos = e.target.getStage()?.getPointerPosition();
     if (!pos) return;
