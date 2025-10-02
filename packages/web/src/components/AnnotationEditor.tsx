@@ -50,39 +50,6 @@ const AnnotationEditor: React.FC = () => {
     return () => window.removeEventListener('resize', updateSize);
   }, []);
 
-  // 当画布尺寸变化时，重新计算背景图居中位置
-  React.useEffect(() => {
-    if (canvasState.backgroundImage) {
-      const img = canvasState.backgroundImage.image;
-      const scaleX = stageSize.width / img.width;
-      const scaleY = stageSize.height / img.height;
-      const scale = Math.min(scaleX, scaleY, 1);
-      
-      const scaledWidth = img.width * scale;
-      const scaledHeight = img.height * scale;
-      
-      const x = (stageSize.width - scaledWidth) / 2;
-      const y = (stageSize.height - scaledHeight) / 2;
-      
-      // 只有当位置或缩放发生变化时才更新
-      if (canvasState.backgroundImage.x !== x || 
-          canvasState.backgroundImage.y !== y || 
-          canvasState.backgroundImage.scaleX !== scale || 
-          canvasState.backgroundImage.scaleY !== scale) {
-        setCanvasState(prev => ({
-          ...prev,
-          backgroundImage: {
-            ...prev.backgroundImage!,
-            x: x,
-            y: y,
-            scaleX: scale,
-            scaleY: scale,
-          }
-        }));
-      }
-    }
-  }, [stageSize.width, stageSize.height, canvasState.backgroundImage?.image]);
-
   // 工具选择
   const handleToolSelect = useCallback((tool: ToolType) => {
     setCanvasState(prev => ({
