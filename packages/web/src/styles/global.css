@@ -1,0 +1,230 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+  background-color: #f5f5f5;
+  overflow: hidden;
+}
+
+.app {
+  width: 100vw;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+/* 工具栏样式 */
+.toolbar {
+  display: flex;
+  align-items: center;
+  padding: 8px 16px;
+  background: white;
+  border-bottom: 1px solid #e5e5e5;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  z-index: 1000;
+}
+
+.toolbar-group {
+  display: flex;
+  align-items: center;
+  margin-right: 24px;
+}
+
+.toolbar-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border: none;
+  background: transparent;
+  border-radius: 4px;
+  cursor: pointer;
+  margin-right: 4px;
+  transition: background-color 0.2s;
+}
+
+.toolbar-button:hover {
+  background-color: #f0f0f0;
+}
+
+.toolbar-button.active {
+  background-color: #e6f3ff;
+  color: #1890ff;
+}
+
+.toolbar-separator {
+  width: 1px;
+  height: 20px;
+  background-color: #e5e5e5;
+  margin: 0 8px;
+}
+
+/* 主要布局 */
+.editor-container {
+  flex: 1;
+  display: flex;
+  overflow: hidden;
+}
+
+.sidebar {
+  width: 200px;
+  background: white;
+  border-right: 1px solid #e5e5e5;
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+}
+
+.sidebar-section {
+  padding: 16px;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.sidebar-title {
+  font-size: 14px;
+  font-weight: 600;
+  margin-bottom: 12px;
+  color: #333;
+}
+
+.tool-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 8px;
+}
+
+.tool-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 12px 8px;
+  border: 1px solid #e5e5e5;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s;
+  background: white;
+}
+
+.tool-item:hover {
+  border-color: #1890ff;
+  background-color: #f6f9ff;
+}
+
+.tool-item.active {
+  border-color: #1890ff;
+  background-color: #e6f3ff;
+  color: #1890ff;
+}
+
+.tool-item-icon {
+  margin-bottom: 4px;
+}
+
+.tool-item-label {
+  font-size: 12px;
+  text-align: center;
+  line-height: 1.2;
+}
+
+.canvas-container {
+  flex: 1;
+  position: relative;
+  background: #f8f8f8;
+  overflow: hidden;
+}
+
+.properties-panel {
+  width: 280px;
+  background: white;
+  border-left: 1px solid #e5e5e5;
+  display: flex;
+  flex-direction: column;
+}
+
+.properties-header {
+  padding: 16px;
+  border-bottom: 1px solid #f0f0f0;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.properties-content {
+  flex: 1;
+  padding: 16px;
+  overflow-y: auto;
+}
+
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 200px;
+  color: #999;
+  text-align: center;
+}
+
+.empty-state-icon {
+  margin-bottom: 8px;
+  opacity: 0.5;
+}
+
+.zoom-control {
+  display: flex;
+  align-items: center;
+  margin-left: auto;
+}
+
+.zoom-button {
+  width: 28px;
+  height: 28px;
+  border: 1px solid #d9d9d9;
+  background: white;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s;
+}
+
+.zoom-button:hover {
+  border-color: #1890ff;
+  color: #1890ff;
+}
+
+.zoom-button:first-child {
+  border-radius: 4px 0 0 4px;
+}
+
+.zoom-button:last-child {
+  border-radius: 0 4px 4px 0;
+  border-left: none;
+}
+
+.zoom-display {
+  padding: 0 12px;
+  height: 28px;
+  border: 1px solid #d9d9d9;
+  border-left: none;
+  border-right: none;
+  background: white;
+  display: flex;
+  align-items: center;
+  font-size: 12px;
+  min-width: 60px;
+  justify-content: center;
+}
+
+/* 画布网格背景 */
+.canvas-grid {
+  background-image: 
+    linear-gradient(rgba(0, 0, 0, 0.1) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0, 0, 0, 0.1) 1px, transparent 1px);
+  background-size: 20px 20px;
+}

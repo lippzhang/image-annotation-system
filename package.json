@@ -1,0 +1,22 @@
+{
+  "name": "image-annotation-system",
+  "version": "1.0.0",
+  "description": "轻量级图片标注系统",
+  "private": true,
+  "workspaces": [
+    "packages/*"
+  ],
+  "scripts": {
+    "dev": "pnpm --filter @annotation/web dev",
+    "build": "pnpm --filter @annotation/web build",
+    "preview": "pnpm --filter @annotation/web preview",
+    "install:all": "pnpm install"
+  },
+  "devDependencies": {
+    "typescript": "^5.0.0"
+  },
+  "engines": {
+    "node": ">=18.0.0",
+    "pnpm": ">=10.0.0"
+  }
+}
