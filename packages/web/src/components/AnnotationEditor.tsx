@@ -234,6 +234,14 @@ const AnnotationEditor: React.FC = () => {
                   objects={canvasState.objects}
                   selectedObjects={canvasState.selectedObjects}
                   onObjectSelect={handleObjectSelect}
+                  onObjectUpdate={(id, updates) => {
+                    setCanvasState(prev => ({
+                      ...prev,
+                      objects: prev.objects.map(obj =>
+                        obj.id === id ? { ...obj, ...updates } : obj
+                      ),
+                    }));
+                  }}
                 />
                 
                 {/* 渲染当前正在绘制的对象 */}

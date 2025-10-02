@@ -6,23 +6,34 @@ interface CanvasObjectsProps {
   objects: AnnotationObject[];
   selectedObjects: string[];
   onObjectSelect: (id: string) => void;
+  onObjectUpdate?: (id: string, updates: Partial<AnnotationObject>) => void;
 }
 
 const CanvasObjects: React.FC<CanvasObjectsProps> = ({
   objects,
   selectedObjects,
   onObjectSelect,
+  onObjectUpdate,
 }) => {
+  const handleDragEnd = (id: string, e: any) => {
+    if (onObjectUpdate) {
+      onObjectUpdate(id, {
+        x: e.target.x(),
+        y: e.target.y(),
+      });
+    }
+  };
+
   const renderObject = (obj: AnnotationObject) => {
     const isSelected = selectedObjects.includes(obj.id);
     const commonProps = {
-      key: obj.id,
       x: obj.x,
       y: obj.y,
       stroke: obj.stroke || '#1890ff',
       strokeWidth: obj.strokeWidth || 2,
       onClick: () => onObjectSelect(obj.id),
       draggable: true,
+      onDragEnd: (e: any) => handleDragEnd(obj.id, e),
       ...(isSelected && {
         shadowColor: '#1890ff',
         shadowBlur: 10,
@@ -34,6 +45,7 @@ const CanvasObjects: React.FC<CanvasObjectsProps> = ({
       case 'rectangle':
         return (
           <Rect
+            key={obj.id}
             {...commonProps}
             width={obj.width || 0}
             height={obj.height || 0}
@@ -44,6 +56,7 @@ const CanvasObjects: React.FC<CanvasObjectsProps> = ({
       case 'circle':
         return (
           <Circle
+            key={obj.id}
             {...commonProps}
             radius={Math.abs(obj.width || 0) / 2}
             fill="transparent"
@@ -53,6 +66,7 @@ const CanvasObjects: React.FC<CanvasObjectsProps> = ({
       case 'line':
         return (
           <Line
+            key={obj.id}
             {...commonProps}
             points={obj.points || []}
             lineCap="round"
@@ -63,6 +77,7 @@ const CanvasObjects: React.FC<CanvasObjectsProps> = ({
       case 'arrow':
         return (
           <Arrow
+            key={obj.id}
             {...commonProps}
             points={obj.points || []}
             pointerLength={10}
@@ -74,6 +89,7 @@ const CanvasObjects: React.FC<CanvasObjectsProps> = ({
       case 'text':
         return (
           <Text
+            key={obj.id}
             {...commonProps}
             text={obj.text || '文本'}
             fontSize={obj.fontSize || 16}
