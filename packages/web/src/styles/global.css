@@ -138,6 +138,19 @@ body {
   overflow: hidden;
 }
 
+/* 只有在没有背景图时才显示网格 */
+.canvas-container.canvas-grid {
+  background-image: 
+    linear-gradient(rgba(0, 0, 0, 0.1) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0, 0, 0, 0.1) 1px, transparent 1px);
+  background-size: 20px 20px;
+}
+
+/* 有背景图时的样式 */
+.canvas-container:not(.canvas-grid) {
+  background: #ffffff;
+}
+
 .properties-panel {
   width: 280px;
   background: white;
@@ -221,10 +234,19 @@ body {
   justify-content: center;
 }
 
-/* 画布网格背景 */
-.canvas-grid {
-  background-image: 
-    linear-gradient(rgba(0, 0, 0, 0.1) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(0, 0, 0, 0.1) 1px, transparent 1px);
-  background-size: 20px 20px;
+/* 图片上传提示 */
+.upload-hint {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  text-align: center;
+  color: #999;
+  font-size: 16px;
+  pointer-events: none;
+}
+
+.upload-hint-icon {
+  margin-bottom: 12px;
+  opacity: 0.5;
 }

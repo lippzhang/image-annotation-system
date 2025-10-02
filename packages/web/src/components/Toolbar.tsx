@@ -5,17 +5,19 @@ import {
   ZoomIn, 
   ZoomOut, 
   Download, 
-  Upload,
   Settings,
   Home
 } from 'lucide-react';
-import { ToolType } from '../types';
+import { ToolType, BackgroundImage } from '../types';
+import ImageUploader from './ImageUploader';
 
 interface ToolbarProps {
   selectedTool: ToolType;
   onToolSelect: (tool: ToolType) => void;
   zoom: number;
   onZoom: (delta: number) => void;
+  onImageLoad: (backgroundImage: BackgroundImage) => void;
+  fileInputRef?: React.RefObject<HTMLInputElement>;
 }
 
 const Toolbar: React.FC<ToolbarProps> = ({
@@ -23,6 +25,8 @@ const Toolbar: React.FC<ToolbarProps> = ({
   onToolSelect,
   zoom,
   onZoom,
+  onImageLoad,
+  fileInputRef,
 }) => {
   return (
     <div className="toolbar">
@@ -30,9 +34,7 @@ const Toolbar: React.FC<ToolbarProps> = ({
         <button className="toolbar-button" title="首页">
           <Home size={16} />
         </button>
-        <button className="toolbar-button" title="上传图片">
-          <Upload size={16} />
-        </button>
+        <ImageUploader onImageLoad={onImageLoad} fileInputRef={fileInputRef} />
         <button className="toolbar-button" title="下载">
           <Download size={16} />
         </button>

@@ -38,6 +38,16 @@ export interface AnnotationObject {
   scaleY?: number;
 }
 
+export interface BackgroundImage {
+  image: HTMLImageElement;
+  width: number;
+  height: number;
+  x: number;
+  y: number;
+  scaleX: number;
+  scaleY: number;
+}
+
 export interface CanvasState {
   zoom: number;
   pan: Point;
@@ -45,7 +55,7 @@ export interface CanvasState {
   selectedObjects: string[];
   objects: AnnotationObject[];
   isDrawing: boolean;
-  backgroundImage?: HTMLImageElement;
+  backgroundImage?: BackgroundImage;
 }
 
 export interface ToolConfig {

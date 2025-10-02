@@ -5,7 +5,9 @@ import Toolbar from './Toolbar';
 import Sidebar from './Sidebar';
 import PropertiesPanel from './PropertiesPanel';
 import CanvasObjects from './CanvasObjects';
-import { CanvasState, ToolType, AnnotationObject, Point } from '../types';
+import BackgroundImage from './BackgroundImage';
+import EmptyCanvas from './EmptyCanvas';
+import { CanvasState, ToolType, AnnotationObject, Point, BackgroundImage as BackgroundImageType } from '../types';
 import { generateId } from '../utils/helpers';
 
 const INITIAL_STATE: CanvasState = {
@@ -23,6 +25,7 @@ const AnnotationEditor: React.FC = () => {
   const [stageSize, setStageSize] = useState({ width: 800, height: 600 });
   const [isDrawing, setIsDrawing] = useState(false);
   const [currentDrawing, setCurrentDrawing] = useState<AnnotationObject | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   // 更新画布尺寸
   React.useEffect(() => {
@@ -59,18 +62,44 @@ const AnnotationEditor: React.FC = () => {
     }));
   }, []);
 
+  // 背景图加载处理
+  const handleImageLoad = useCallback((backgroundImage: BackgroundImageType) => {
+    setCanvasState(prev => ({
+      ...prev,
+      backgroundImage,
+      // 清空现有标注对象
+      objects: [],
+      selectedObjects: [],
+    }));
+  }, []);
+
+  // 触发文件选择
+  const handleUploadClick = useCallback(() => {
+    fileInputRef.current?.click();
+  }, []);
+
   // 鼠标按下事件
   const handleMouseDown = useCallback((e: Konva.KonvaEventObject<MouseEvent>) => {
-    if (canvasState.selectedTool === 'select') return;
+    // 如果没有背景图，不允许标注
+    if (!canvasState.backgroundImage) return;
+    
+    // 如果点击的是背景图或者是选择工具，不创建新对象
+    if (canvasState.selectedTool === 'select' || e.target === e.target.getStage()) return;
 
     const pos = e.target.getStage()?.getPointerPosition();
     if (!pos) return;
 
+    // 转换坐标，考虑缩放
+    const adjustedPos = {
+      x: pos.x / canvasState.zoom,
+      y: pos.y / canvasState.zoom,
+    };
+
     const newObject: AnnotationObject = {
       id: generateId(),
       type: canvasState.selectedTool,
-      x: pos.x,
-      y: pos.y,
+      x: adjustedPos.x,
+      y: adjustedPos.y,
       stroke: '#1890ff',
       strokeWidth: 2,
     };
@@ -79,7 +108,7 @@ const AnnotationEditor: React.FC = () => {
       newObject.width = 0;
       newObject.height = 0;
     } else if (canvasState.selectedTool === 'line' || canvasState.selectedTool === 'arrow') {
-      newObject.points = [pos.x, pos.y, pos.x, pos.y];
+      newObject.points = [adjustedPos.x, adjustedPos.y, adjustedPos.x, adjustedPos.y];
     } else if (canvasState.selectedTool === 'text') {
       newObject.text = '文本';
       newObject.fontSize = 16;
@@ -89,7 +118,7 @@ const AnnotationEditor: React.FC = () => {
 
     setCurrentDrawing(newObject);
     setIsDrawing(true);
-  }, [canvasState.selectedTool]);
+  }, [canvasState.selectedTool, canvasState.zoom, canvasState.backgroundImage]);
 
   // 鼠标移动事件
   const handleMouseMove = useCallback((e: Konva.KonvaEventObject<MouseEvent>) => {
@@ -98,17 +127,23 @@ const AnnotationEditor: React.FC = () => {
     const pos = e.target.getStage()?.getPointerPosition();
     if (!pos) return;
 
+    // 转换坐标，考虑缩放
+    const adjustedPos = {
+      x: pos.x / canvasState.zoom,
+      y: pos.y / canvasState.zoom,
+    };
+
     const updatedObject = { ...currentDrawing };
 
     if (currentDrawing.type === 'rectangle' || currentDrawing.type === 'circle') {
-      updatedObject.width = pos.x - currentDrawing.x;
-      updatedObject.height = pos.y - currentDrawing.y;
+      updatedObject.width = adjustedPos.x - currentDrawing.x;
+      updatedObject.height = adjustedPos.y - currentDrawing.y;
     } else if (currentDrawing.type === 'line' || currentDrawing.type === 'arrow') {
-      updatedObject.points = [currentDrawing.x, currentDrawing.y, pos.x, pos.y];
+      updatedObject.points = [currentDrawing.x, currentDrawing.y, adjustedPos.x, adjustedPos.y];
     }
 
     setCurrentDrawing(updatedObject);
-  }, [isDrawing, currentDrawing]);
+  }, [isDrawing, currentDrawing, canvasState.zoom]);
 
   // 鼠标抬起事件
   const handleMouseUp = useCallback(() => {
@@ -163,6 +198,8 @@ const AnnotationEditor: React.FC = () => {
         onToolSelect={handleToolSelect}
         zoom={canvasState.zoom}
         onZoom={handleZoom}
+        onImageLoad={handleImageLoad}
+        fileInputRef={fileInputRef}
       />
       
       <div className="editor-container">
@@ -171,7 +208,12 @@ const AnnotationEditor: React.FC = () => {
           onToolSelect={handleToolSelect}
         />
         
-        <div className="canvas-container canvas-grid">
+        <div className={`canvas-container ${!canvasState.backgroundImage ? 'canvas-grid' : ''}`}>
+          {/* 空状态提示 */}
+          {!canvasState.backgroundImage && (
+            <EmptyCanvas onUploadClick={handleUploadClick} />
+          )}
+          
           <Stage
             ref={stageRef}
             width={stageSize.width}
@@ -183,11 +225,19 @@ const AnnotationEditor: React.FC = () => {
             onMouseup={handleMouseUp}
           >
             <Layer>
+              {/* 渲染背景图 */}
+              {canvasState.backgroundImage && (
+                <BackgroundImage backgroundImage={canvasState.backgroundImage} />
+              )}
+              
+              {/* 渲染标注对象 */}
               <CanvasObjects
                 objects={canvasState.objects}
                 selectedObjects={canvasState.selectedObjects}
                 onObjectSelect={handleObjectSelect}
               />
+              
+              {/* 渲染当前正在绘制的对象 */}
               {currentDrawing && (
                 <CanvasObjects
                   objects={[currentDrawing]}
