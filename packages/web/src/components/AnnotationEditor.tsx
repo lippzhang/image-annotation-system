@@ -415,6 +415,7 @@ const AnnotationEditor: React.FC = () => {
                     objects={[currentDrawing]}
                     selectedObjects={[]}
                     onObjectSelect={() => {}}
+                    onObjectUpdate={() => {}}
                   />
                 )}
               </Layer>
