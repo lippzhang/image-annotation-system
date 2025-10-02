@@ -33,17 +33,43 @@ const AnnotationEditor: React.FC = () => {
       const container = document.querySelector('.canvas-container');
       if (container) {
         const rect = container.getBoundingClientRect();
-        setStageSize({
+        const newSize = {
           width: rect.width,
           height: rect.height,
-        });
+        };
+        setStageSize(newSize);
+        
+        // 如果有背景图，重新计算居中位置
+        if (canvasState.backgroundImage) {
+          const img = canvasState.backgroundImage.image;
+          const scaleX = newSize.width / img.width;
+          const scaleY = newSize.height / img.height;
+          const scale = Math.min(scaleX, scaleY, 1);
+          
+          const scaledWidth = img.width * scale;
+          const scaledHeight = img.height * scale;
+          
+          const x = (newSize.width - scaledWidth) / 2;
+          const y = (newSize.height - scaledHeight) / 2;
+          
+          setCanvasState(prev => ({
+            ...prev,
+            backgroundImage: {
+              ...prev.backgroundImage!,
+              x: x,
+              y: y,
+              scaleX: scale,
+              scaleY: scale,
+            }
+          }));
+        }
       }
     };
 
     updateSize();
     window.addEventListener('resize', updateSize);
     return () => window.removeEventListener('resize', updateSize);
-  }, []);
+  }, [canvasState.backgroundImage]);
 
   // 工具选择
   const handleToolSelect = useCallback((tool: ToolType) => {
@@ -64,14 +90,36 @@ const AnnotationEditor: React.FC = () => {
 
   // 背景图加载处理
   const handleImageLoad = useCallback((backgroundImage: BackgroundImageType) => {
+    // 使用实际的画布尺寸重新计算居中位置
+    const actualCanvasSize = { width: stageSize.width, height: stageSize.height };
+    
+    // 重新计算居中位置
+    const scaleX = actualCanvasSize.width / backgroundImage.image.width;
+    const scaleY = actualCanvasSize.height / backgroundImage.image.height;
+    const scale = Math.min(scaleX, scaleY, 1); // 不放大图片
+    
+    const scaledWidth = backgroundImage.image.width * scale;
+    const scaledHeight = backgroundImage.image.height * scale;
+    
+    const x = (actualCanvasSize.width - scaledWidth) / 2;
+    const y = (actualCanvasSize.height - scaledHeight) / 2;
+    
+    const centeredBackgroundImage: BackgroundImageType = {
+      ...backgroundImage,
+      x: x,
+      y: y,
+      scaleX: scale,
+      scaleY: scale,
+    };
+    
     setCanvasState(prev => ({
       ...prev,
-      backgroundImage,
+      backgroundImage: centeredBackgroundImage,
       // 清空现有标注对象
       objects: [],
       selectedObjects: [],
     }));
-  }, []);
+  }, [stageSize]);
 
   // 触发文件选择
   const handleUploadClick = useCallback(() => {

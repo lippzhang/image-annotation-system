@@ -1,6 +1,7 @@
 import React, { useRef } from 'react';
 import { Upload } from 'lucide-react';
 import { BackgroundImage } from '../types';
+import { calculateCenteredImagePosition } from '../utils/imageUtils';
 
 interface ImageUploaderProps {
   onImageLoad: (backgroundImage: BackgroundImage) => void;
@@ -31,33 +32,8 @@ const ImageUploader: React.FC<ImageUploaderProps> = ({ onImageLoad, fileInputRef
     reader.onload = (e) => {
       const img = new Image();
       img.onload = () => {
-        // 计算合适的缩放比例，使图片适应画布
-        const maxWidth = 800;
-        const maxHeight = 600;
-        
-        let scaleX = 1;
-        let scaleY = 1;
-        
-        if (img.width > maxWidth) {
-          scaleX = maxWidth / img.width;
-        }
-        if (img.height > maxHeight) {
-          scaleY = maxHeight / img.height;
-        }
-        
-        // 使用较小的缩放比例，保持图片比例
-        const scale = Math.min(scaleX, scaleY);
-        
-        const backgroundImage: BackgroundImage = {
-          image: img,
-          width: img.width,
-          height: img.height,
-          x: 0,
-          y: 0,
-          scaleX: scale,
-          scaleY: scale,
-        };
-        
+        // 使用工具函数计算居中位置和缩放比例
+        const backgroundImage = calculateCenteredImagePosition(img);
         onImageLoad(backgroundImage);
       };
       
