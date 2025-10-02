@@ -89,9 +89,6 @@ const AnnotationEditor: React.FC = () => {
 
   // 缩放控制
   const handleZoom = useCallback((delta: number) => {
-    const stage = stageRef.current;
-    if (!stage) return;
-
     setCanvasState(prev => {
       const oldZoom = prev.zoom;
       const newZoom = Math.max(0.1, Math.min(5, oldZoom + delta));
@@ -104,8 +101,8 @@ const AnnotationEditor: React.FC = () => {
       const centerY = stageSize.height / 2;
       
       // 计算当前舞台的位置
-      const currentX = stage.x();
-      const currentY = stage.y();
+      const currentX = prev.pan.x;
+      const currentY = prev.pan.y;
       
       // 计算缩放中心点在世界坐标系中的位置
       const worldCenterX = (centerX - currentX) / oldZoom;
@@ -114,10 +111,6 @@ const AnnotationEditor: React.FC = () => {
       // 计算新的舞台位置，使缩放中心点保持在屏幕中心
       const newX = centerX - worldCenterX * newZoom;
       const newY = centerY - worldCenterY * newZoom;
-      
-      // 更新舞台位置
-      stage.x(newX);
-      stage.y(newY);
       
       return {
         ...prev,
@@ -157,6 +150,9 @@ const AnnotationEditor: React.FC = () => {
       // 清空现有标注对象
       objects: [],
       selectedObjects: [],
+      // 重置缩放和平移状态
+      zoom: 1,
+      pan: { x: 0, y: 0 },
     }));
   }, [stageSize]);
 
