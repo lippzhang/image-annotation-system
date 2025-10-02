@@ -26,6 +26,11 @@ const AnnotationEditor: React.FC = () => {
   const [isDrawing, setIsDrawing] = useState(false);
   const [currentDrawing, setCurrentDrawing] = useState<AnnotationObject | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  
+  // 空格键拖拽相关状态
+  const [isSpacePressed, setIsSpacePressed] = useState(false);
+  const [isDragging, setIsDragging] = useState(false);
+  const [lastPointerPosition, setLastPointerPosition] = useState<Point | null>(null);
 
   // 更新画布尺寸
   React.useEffect(() => {
@@ -202,8 +207,55 @@ const AnnotationEditor: React.FC = () => {
     }
   }, [canvasState.zoom, canvasState.pan]);
 
+  // 删除选中对象
+  const handleDeleteSelected = useCallback(() => {
+    setCanvasState(prev => ({
+      ...prev,
+      objects: prev.objects.filter(obj => !prev.selectedObjects.includes(obj.id)),
+      selectedObjects: [],
+    }));
+  }, []);
+
+  // 键盘事件
+  React.useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Delete' || e.key === 'Backspace') {
+        handleDeleteSelected();
+      } else if (e.code === 'Space' && !isSpacePressed) {
+        e.preventDefault();
+        setIsSpacePressed(true);
+      }
+    };
+
+    const handleKeyUp = (e: KeyboardEvent) => {
+      if (e.code === 'Space') {
+        e.preventDefault();
+        setIsSpacePressed(false);
+        setIsDragging(false);
+        setLastPointerPosition(null);
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    window.addEventListener('keyup', handleKeyUp);
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown);
+      window.removeEventListener('keyup', handleKeyUp);
+    };
+  }, [handleDeleteSelected, isSpacePressed]);
+
   // 鼠标按下事件
   const handleMouseDown = useCallback((e: Konva.KonvaEventObject<MouseEvent>) => {
+    const pos = e.target.getStage()?.getPointerPosition();
+    if (!pos) return;
+
+    // 如果按住空格键，开始拖拽画布
+    if (isSpacePressed) {
+      setIsDragging(true);
+      setLastPointerPosition(pos);
+      return;
+    }
+
     // 如果没有背景图，不允许标注
     if (!canvasState.backgroundImage) return;
     
@@ -212,9 +264,6 @@ const AnnotationEditor: React.FC = () => {
     
     // 如果点击的是已存在的标注对象，不创建新对象
     if (e.target !== e.target.getStage() && e.target.getClassName() !== 'Image') return;
-
-    const pos = e.target.getStage()?.getPointerPosition();
-    if (!pos) return;
 
     // 转换坐标，考虑缩放和平移
     const adjustedPos = {
@@ -247,14 +296,31 @@ const AnnotationEditor: React.FC = () => {
 
     setCurrentDrawing(newObject);
     setIsDrawing(true);
-  }, [canvasState.selectedTool, canvasState.zoom, canvasState.backgroundImage]);
+  }, [canvasState.selectedTool, canvasState.zoom, canvasState.backgroundImage, isSpacePressed]);
 
   // 鼠标移动事件
   const handleMouseMove = useCallback((e: Konva.KonvaEventObject<MouseEvent>) => {
-    if (!isDrawing || !currentDrawing) return;
-
     const pos = e.target.getStage()?.getPointerPosition();
     if (!pos) return;
+
+    // 如果正在拖拽画布
+    if (isDragging && lastPointerPosition) {
+      const dx = pos.x - lastPointerPosition.x;
+      const dy = pos.y - lastPointerPosition.y;
+      
+      setCanvasState(prev => ({
+        ...prev,
+        pan: {
+          x: prev.pan.x + dx,
+          y: prev.pan.y + dy,
+        }
+      }));
+      
+      setLastPointerPosition(pos);
+      return;
+    }
+
+    if (!isDrawing || !currentDrawing) return;
 
     // 转换坐标，考虑缩放和平移
     const adjustedPos = {
@@ -276,10 +342,17 @@ const AnnotationEditor: React.FC = () => {
     }
 
     setCurrentDrawing(updatedObject);
-  }, [isDrawing, currentDrawing, canvasState.zoom, canvasState.pan]);
+  }, [isDrawing, currentDrawing, canvasState.zoom, canvasState.pan, isDragging, lastPointerPosition]);
 
   // 鼠标抬起事件
   const handleMouseUp = useCallback(() => {
+    // 如果正在拖拽画布，停止拖拽
+    if (isDragging) {
+      setIsDragging(false);
+      setLastPointerPosition(null);
+      return;
+    }
+
     if (!isDrawing || !currentDrawing) return;
 
     setCanvasState(prev => ({
@@ -289,7 +362,7 @@ const AnnotationEditor: React.FC = () => {
 
     setIsDrawing(false);
     setCurrentDrawing(null);
-  }, [isDrawing, currentDrawing]);
+  }, [isDrawing, currentDrawing, isDragging]);
 
   // 对象选择
   const handleObjectSelect = useCallback((id: string) => {
@@ -298,27 +371,6 @@ const AnnotationEditor: React.FC = () => {
       selectedObjects: [id],
     }));
   }, []);
-
-  // 删除选中对象
-  const handleDeleteSelected = useCallback(() => {
-    setCanvasState(prev => ({
-      ...prev,
-      objects: prev.objects.filter(obj => !prev.selectedObjects.includes(obj.id)),
-      selectedObjects: [],
-    }));
-  }, []);
-
-  // 键盘事件
-  React.useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'Delete' || e.key === 'Backspace') {
-        handleDeleteSelected();
-      }
-    };
-
-    window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [handleDeleteSelected]);
 
   const selectedObject = canvasState.objects.find(obj => 
     canvasState.selectedObjects.includes(obj.id)
@@ -342,7 +394,12 @@ const AnnotationEditor: React.FC = () => {
           onToolSelect={handleToolSelect}
         />
         
-        <div className={`canvas-container ${!canvasState.backgroundImage ? 'canvas-grid' : ''}`}>
+        <div 
+          className={`canvas-container ${!canvasState.backgroundImage ? 'canvas-grid' : ''}`}
+          style={{ 
+            cursor: isSpacePressed ? (isDragging ? 'grabbing' : 'grab') : 'default' 
+          }}
+        >
           {!canvasState.backgroundImage ? (
             <EmptyCanvas onUploadClick={handleUploadClick} />
           ) : (
