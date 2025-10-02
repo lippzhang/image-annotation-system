@@ -358,10 +358,12 @@ const AnnotationEditor: React.FC = () => {
               onMousemove={handleMouseMove}
               onMouseup={handleMouseUp}
               onWheel={(e) => {
-                e.evt.preventDefault();
-                const scaleBy = 1.1;
-                const delta = e.evt.deltaY > 0 ? -0.1 : 0.1;
-                handleZoom(delta);
+                // 只有按住 Ctrl 键时才进行缩放
+                if (e.evt.ctrlKey || e.evt.metaKey) {
+                  e.evt.preventDefault();
+                  const delta = e.evt.deltaY > 0 ? -0.1 : 0.1;
+                  handleZoom(delta);
+                }
               }}
             >
               <Layer>
