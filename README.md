@@ -158,6 +158,13 @@ pnpm preview
 
 修改 `styles/global.css` 文件来自定义界面样式。
 
+## TODO
+
+[]: # - [ ] 添加快捷键
+[]: # - [ ] 代码重构
+[]: # - [ ] 导入导出json
+[]: # - [ ] 导入导出图片
+
 ## 许可证
 
 MIT License

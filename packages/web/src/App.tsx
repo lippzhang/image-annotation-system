@@ -1,5 +1,6 @@
 import React from 'react';
-import AnnotationEditor from './components/AnnotationEditor';
+// import AnnotationEditor from './components/AnnotationEditor';
+import AnnotationEditor from './components/AnnotationEditorRefactored';
 import './styles/global.css';
 
 const App: React.FC = () => {
