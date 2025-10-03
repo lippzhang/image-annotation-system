@@ -1,6 +1,5 @@
 import React from 'react';
 import { 
-  MousePointer2,
   Type,
   Square,
   Circle,
@@ -9,10 +8,6 @@ import {
   Pen,
   Eraser,
   Ruler,
-  Share2,
-  Download,
-  Maximize,
-  Eye,
   Image,
   Grid,
   Palette
