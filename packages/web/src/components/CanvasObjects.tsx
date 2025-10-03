@@ -22,13 +22,23 @@ const CanvasObjects: React.FC<CanvasObjectsProps> = ({
   // 当选中对象改变时，更新Transformer
   useEffect(() => {
     if (transformerRef.current) {
-      const selectedNodes = selectedObjects.map(id => shapeRefs.current[id]).filter(Boolean);
+      // 只对未锁定的选中对象应用 Transformer
+      const selectedNodes = selectedObjects
+        .map(id => {
+          const obj = objects.find(o => o.id === id);
+          return obj && !obj.locked ? shapeRefs.current[id] : null;
+        })
+        .filter((node): node is Konva.Node => node !== null);
+      
       transformerRef.current.nodes(selectedNodes);
       transformerRef.current.getLayer()?.batchDraw();
     }
-  }, [selectedObjects]);
+  }, [selectedObjects, objects]);
 
   const handleDragEnd = (id: string, e: any) => {
+    const obj = objects.find(o => o.id === id);
+    if (obj?.locked) return; // 锁定的对象不能拖拽
+    
     if (onObjectUpdate) {
       const node = e.target;
       onObjectUpdate(id, {
@@ -39,6 +49,9 @@ const CanvasObjects: React.FC<CanvasObjectsProps> = ({
   };
 
   const handleTransformEnd = (id: string, e: any) => {
+    const obj = objects.find(o => o.id === id);
+    if (obj?.locked) return; // 锁定的对象不能变换
+    
     if (onObjectUpdate) {
       const node = e.target;
       const scaleX = node.scaleX();
@@ -48,7 +61,6 @@ const CanvasObjects: React.FC<CanvasObjectsProps> = ({
       node.scaleX(1);
       node.scaleY(1);
       
-      const obj = objects.find(o => o.id === id);
       if (!obj) return;
 
       if (obj.type === 'rectangle') {
@@ -76,15 +88,24 @@ const CanvasObjects: React.FC<CanvasObjectsProps> = ({
     }
   };
 
+  const handleObjectClick = (obj: AnnotationObject) => {
+    // 锁定的对象也可以被选中，但不能编辑
+    onObjectSelect(obj.id);
+  };
+
   const renderObject = (obj: AnnotationObject) => {
+    // 如果对象不可见，不渲染
+    if (obj.visible === false) return null;
+    
+    const isLocked = obj.locked;
     const commonProps = {
       x: obj.x,
       y: obj.y,
       stroke: obj.stroke || '#1890ff',
       strokeWidth: obj.strokeWidth || 2,
-      onClick: () => onObjectSelect(obj.id),
-      onTap: () => onObjectSelect(obj.id),
-      draggable: true,
+      onClick: () => handleObjectClick(obj),
+      onTap: () => handleObjectClick(obj),
+      draggable: !isLocked, // 锁定的对象不能拖拽
       onDragEnd: (e: any) => handleDragEnd(obj.id, e),
       onTransformEnd: (e: any) => handleTransformEnd(obj.id, e),
       ref: (node: any) => {
@@ -92,6 +113,8 @@ const CanvasObjects: React.FC<CanvasObjectsProps> = ({
           shapeRefs.current[obj.id] = node;
         }
       },
+      // 锁定的对象显示不同的样式
+      opacity: isLocked ? 0.7 : 1,
     };
 
     switch (obj.type) {
@@ -103,6 +126,7 @@ const CanvasObjects: React.FC<CanvasObjectsProps> = ({
             width={obj.width || 0}
             height={obj.height || 0}
             fill="transparent"
+            dash={isLocked ? [5, 5] : undefined} // 锁定时显示虚线
           />
         );
 
@@ -113,6 +137,7 @@ const CanvasObjects: React.FC<CanvasObjectsProps> = ({
             {...commonProps}
             radius={Math.abs(obj.width || 0) / 2}
             fill="transparent"
+            dash={isLocked ? [5, 5] : undefined} // 锁定时显示虚线
           />
         );
 
@@ -125,10 +150,13 @@ const CanvasObjects: React.FC<CanvasObjectsProps> = ({
             points={obj.points || []}
             lineCap="round"
             lineJoin="round"
-            onClick={() => onObjectSelect(obj.id)}
-            onTap={() => onObjectSelect(obj.id)}
-            draggable={true}
+            onClick={() => handleObjectClick(obj)}
+            onTap={() => handleObjectClick(obj)}
+            draggable={!isLocked}
+            opacity={isLocked ? 0.7 : 1}
+            dash={isLocked ? [5, 5] : undefined}
             onDragEnd={(e: any) => {
+              if (isLocked) return;
               if (onObjectUpdate) {
                 const deltaX = e.target.x();
                 const deltaY = e.target.y();
@@ -167,10 +195,13 @@ const CanvasObjects: React.FC<CanvasObjectsProps> = ({
             pointerLength={10}
             pointerWidth={10}
             fill={obj.stroke || '#1890ff'}
-            onClick={() => onObjectSelect(obj.id)}
-            onTap={() => onObjectSelect(obj.id)}
-            draggable={true}
+            onClick={() => handleObjectClick(obj)}
+            onTap={() => handleObjectClick(obj)}
+            draggable={!isLocked}
+            opacity={isLocked ? 0.7 : 1}
+            dash={isLocked ? [5, 5] : undefined}
             onDragEnd={(e: any) => {
+              if (isLocked) return;
               if (onObjectUpdate) {
                 const deltaX = e.target.x();
                 const deltaY = e.target.y();
@@ -205,9 +236,11 @@ const CanvasObjects: React.FC<CanvasObjectsProps> = ({
             key={obj.id}
             stroke={obj.stroke || '#1890ff'}
             strokeWidth={obj.strokeWidth || 2}
-            onClick={() => onObjectSelect(obj.id)}
-            onTap={() => onObjectSelect(obj.id)}
-            draggable={true}
+            onClick={() => handleObjectClick(obj)}
+            onTap={() => handleObjectClick(obj)}
+            draggable={!isLocked}
+            opacity={isLocked ? 0.7 : 1}
+            dash={isLocked ? [5, 5] : undefined}
             onDragEnd={(e: any) => handleDragEnd(obj.id, e)}
             points={obj.points || []}
             lineCap="round"

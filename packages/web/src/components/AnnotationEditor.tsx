@@ -3,12 +3,13 @@ import { Stage, Layer } from 'react-konva';
 import Konva from 'konva';
 import Toolbar from './Toolbar';
 import Sidebar from './Sidebar';
-import PropertiesPanel from './PropertiesPanel';
+import RightPanel from './RightPanel';
 import CanvasObjects from './CanvasObjects';
 import BackgroundImage from './BackgroundImage';
 import EmptyCanvas from './EmptyCanvas';
 import { CanvasState, ToolType, AnnotationObject, Point, BackgroundImage as BackgroundImageType } from '../types';
 import { generateId } from '../utils/helpers';
+import { getNextZIndex, sortObjectsByZIndex, generateLayerName } from '../utils/layerUtils';
 
 const INITIAL_STATE: CanvasState = {
   zoom: 1,
@@ -247,6 +248,10 @@ const AnnotationEditor: React.FC = () => {
       y: (pos.y - canvasState.pan.y) / canvasState.zoom,
     };
 
+    // 获取下一个 zIndex 和生成图层名称
+    const nextZIndex = getNextZIndex(canvasState.objects);
+    const layerName = generateLayerName(canvasState.selectedTool, canvasState.objects.length + 1);
+
     const newObject: AnnotationObject = {
       id: generateId(),
       type: canvasState.selectedTool,
@@ -254,6 +259,11 @@ const AnnotationEditor: React.FC = () => {
       y: adjustedPos.y,
       stroke: '#1890ff',
       strokeWidth: 2,
+      // 图层属性
+      zIndex: nextZIndex,
+      locked: false,
+      visible: true,
+      name: layerName,
     };
 
     if (canvasState.selectedTool === 'rectangle' || canvasState.selectedTool === 'circle') {
@@ -272,7 +282,7 @@ const AnnotationEditor: React.FC = () => {
 
     setCurrentDrawing(newObject);
     setIsDrawing(true);
-  }, [canvasState.selectedTool, canvasState.zoom, canvasState.backgroundImage, isSpacePressed, currentDrawing]);
+  }, [canvasState.selectedTool, canvasState.zoom, canvasState.backgroundImage, canvasState.objects, isSpacePressed]);
 
   // 鼠标移动事件
   const handleMouseMove = useCallback((e: Konva.KonvaEventObject<MouseEvent>) => {
@@ -348,9 +358,30 @@ const AnnotationEditor: React.FC = () => {
     }));
   }, []);
 
+  // 图层管理函数
+  const handleObjectsUpdate = useCallback((updatedObjects: AnnotationObject[]) => {
+    setCanvasState(prev => ({
+      ...prev,
+      objects: updatedObjects,
+    }));
+  }, []);
+
+  // 对象更新
+  const handleObjectUpdate = useCallback((id: string, updates: Partial<AnnotationObject>) => {
+    setCanvasState(prev => ({
+      ...prev,
+      objects: prev.objects.map(obj =>
+        obj.id === id ? { ...obj, ...updates } : obj
+      ),
+    }));
+  }, []);
+
   const selectedObject = canvasState.objects.find(obj => 
     canvasState.selectedObjects.includes(obj.id)
   );
+
+  // 按 zIndex 排序对象用于渲染
+  const sortedObjects = sortObjectsByZIndex(canvasState.objects);
 
   return (
     <div className="app">
@@ -388,8 +419,68 @@ const AnnotationEditor: React.FC = () => {
               x={canvasState.pan.x}
               y={canvasState.pan.y}
               onMouseDown={handleMouseDown}
-              onMousemove={handleMouseMove}
-              onMouseup={handleMouseUp}
+              onMousemove={(e: Konva.KonvaEventObject<MouseEvent>) => {
+                const pos = e.target.getStage()?.getPointerPosition();
+                if (!pos) return;
+
+                // 如果正在拖拽画布
+                if (isDragging && lastPointerPosition) {
+                  const dx = pos.x - lastPointerPosition.x;
+                  const dy = pos.y - lastPointerPosition.y;
+                  
+                  setCanvasState(prev => ({
+                    ...prev,
+                    pan: {
+                      x: prev.pan.x + dx,
+                      y: prev.pan.y + dy,
+                    }
+                  }));
+                  
+                  setLastPointerPosition(pos);
+                  return;
+                }
+
+                if (!isDrawing || !currentDrawing) return;
+
+                // 转换坐标，考虑缩放和平移
+                const adjustedPos = {
+                  x: (pos.x - canvasState.pan.x) / canvasState.zoom,
+                  y: (pos.y - canvasState.pan.y) / canvasState.zoom,
+                };
+
+                const updatedObject = { ...currentDrawing };
+
+                if (currentDrawing.type === 'rectangle' || currentDrawing.type === 'circle') {
+                  updatedObject.width = adjustedPos.x - currentDrawing.x;
+                  updatedObject.height = adjustedPos.y - currentDrawing.y;
+                } else if (currentDrawing.type === 'line' || currentDrawing.type === 'arrow') {
+                  updatedObject.points = [currentDrawing.x, currentDrawing.y, adjustedPos.x, adjustedPos.y];
+                } else if (currentDrawing.type === 'pen') {
+                  // 画笔工具：将新的点添加到轨迹中
+                  const currentPoints = currentDrawing.points || [];
+                  updatedObject.points = [...currentPoints, adjustedPos.x, adjustedPos.y];
+                }
+
+                setCurrentDrawing(updatedObject);
+              }}
+              onMouseup={() => {
+                // 如果正在拖拽画布，停止拖拽
+                if (isDragging) {
+                  setIsDragging(false);
+                  setLastPointerPosition(null);
+                  return;
+                }
+
+                if (!isDrawing || !currentDrawing) return;
+
+                setCanvasState(prev => ({
+                  ...prev,
+                  objects: [...prev.objects, currentDrawing],
+                }));
+
+                setIsDrawing(false);
+                setCurrentDrawing(null);
+              }}
               onWheel={(e) => {
                 // 只有按住 Ctrl 键时才进行缩放
                 if (e.evt.ctrlKey || e.evt.metaKey) {
@@ -403,19 +494,12 @@ const AnnotationEditor: React.FC = () => {
                 {/* 渲染背景图 */}
                 <BackgroundImage backgroundImage={canvasState.backgroundImage} />
                 
-                {/* 渲染标注对象 */}
+                {/* 渲染标注对象（按 zIndex 排序） */}
                 <CanvasObjects
-                  objects={canvasState.objects}
+                  objects={sortedObjects.filter(obj => obj.visible !== false)}
                   selectedObjects={canvasState.selectedObjects}
                   onObjectSelect={handleObjectSelect}
-                  onObjectUpdate={(id, updates) => {
-                    setCanvasState(prev => ({
-                      ...prev,
-                      objects: prev.objects.map(obj =>
-                        obj.id === id ? { ...obj, ...updates } : obj
-                      ),
-                    }));
-                  }}
+                  onObjectUpdate={handleObjectUpdate}
                 />
                 
                 {/* 渲染当前正在绘制的对象 */}
@@ -432,18 +516,13 @@ const AnnotationEditor: React.FC = () => {
           )}
         </div>
         
-        <PropertiesPanel
+        <RightPanel
+          objects={canvasState.objects}
+          selectedObjects={canvasState.selectedObjects}
           selectedObject={selectedObject}
-          onObjectUpdate={(updates) => {
-            if (selectedObject) {
-              setCanvasState(prev => ({
-                ...prev,
-                objects: prev.objects.map(obj =>
-                  obj.id === selectedObject.id ? { ...obj, ...updates } : obj
-                ),
-              }));
-            }
-          }}
+          onObjectsUpdate={handleObjectsUpdate}
+          onObjectSelect={handleObjectSelect}
+          onObjectUpdate={handleObjectUpdate}
         />
       </div>
     </div>

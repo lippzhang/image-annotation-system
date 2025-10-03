@@ -36,6 +36,11 @@ export interface AnnotationObject {
   rotation?: number;
   scaleX?: number;
   scaleY?: number;
+  // 图层相关属性
+  zIndex?: number;
+  locked?: boolean;
+  visible?: boolean;
+  name?: string;
 }
 
 export interface BackgroundImage {
