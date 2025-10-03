@@ -61,7 +61,7 @@ const PropertiesPanel: React.FC<PropertiesPanelProps> = ({
                   </label>
                   <input
                     type="number"
-                    value={selectedObject.fontSize || 16}
+                    value={selectedObject.fontSize || 40}
                     onChange={(e) => onObjectUpdate({ fontSize: parseInt(e.target.value) })}
                     style={{
                       width: '100%',

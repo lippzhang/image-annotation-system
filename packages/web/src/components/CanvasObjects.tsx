@@ -82,7 +82,7 @@ const CanvasObjects: React.FC<CanvasObjectsProps> = ({
         onObjectUpdate(id, {
           x: node.x(),
           y: node.y(),
-          fontSize: Math.max(8, (obj.fontSize || 16) * Math.max(scaleX, scaleY)),
+          fontSize: Math.max(8, Math.round((obj.fontSize || 40) * Math.max(scaleX, scaleY))),
         });
       }
     }
@@ -260,7 +260,7 @@ const CanvasObjects: React.FC<CanvasObjectsProps> = ({
             key={obj.id}
             {...commonProps}
             text={obj.text || '文本'}
-            fontSize={obj.fontSize || 16}
+            fontSize={obj.fontSize || 40}
             fontFamily={obj.fontFamily || 'Arial'}
             fill={obj.fill || '#333'}
             stroke={undefined}

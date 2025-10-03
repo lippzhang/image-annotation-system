@@ -328,7 +328,7 @@ const AnnotationEditor: React.FC = () => {
       newObject.points = [adjustedPos.x, adjustedPos.y];
     } else if (canvasState.selectedTool === 'text') {
       newObject.text = '文本';
-      newObject.fontSize = 16;
+      newObject.fontSize = 40;
       newObject.fontFamily = 'Arial';
       newObject.fill = '#333';
     }
