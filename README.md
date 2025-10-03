@@ -4,9 +4,9 @@
 
 ## 项目预览
 
-![轻快标图 - 项目运行截图](./packages/website//public/project-screenshot.png)
+![智绘标注  - 项目运行截图](./packages/website//public/project-screenshot.png)
 
-*轻快标图 - 轻量图片标注工具运行界面*
+*智绘标注  - 轻量图片标注工具运行界面*
 
 ## 功能特性
 
