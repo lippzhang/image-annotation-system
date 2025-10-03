@@ -57,6 +57,15 @@ body {
   color: #1890ff;
 }
 
+.toolbar-button.disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.toolbar-button.disabled:hover {
+  background-color: transparent;
+}
+
 .toolbar-separator {
   width: 1px;
   height: 20px;

@@ -33,6 +33,48 @@ const AnnotationEditor: React.FC = () => {
   const [isDragging, setIsDragging] = useState(false);
   const [lastPointerPosition, setLastPointerPosition] = useState<Point | null>(null);
 
+  // 历史记录管理 - 使用 refs 避免不必要的重新渲染
+  const history = useRef<AnnotationObject[][]>([[]]);
+  const historyStep = useRef(0);
+
+  // 保存到历史记录
+  const saveToHistory = useCallback((objects: AnnotationObject[]) => {
+    // 移除当前步骤之后的所有历史记录
+    history.current = history.current.slice(0, historyStep.current + 1);
+    
+    // 添加新的状态到历史记录
+    history.current = history.current.concat([objects]);
+    historyStep.current += 1;
+  }, []);
+
+  // 撤销功能
+  const handleUndo = useCallback(() => {
+    if (historyStep.current === 0) {
+      return;
+    }
+    historyStep.current -= 1;
+    const previousObjects = history.current[historyStep.current];
+    setCanvasState(prev => ({
+      ...prev,
+      objects: previousObjects,
+      selectedObjects: [], // 撤销时清空选择
+    }));
+  }, []);
+
+  // 重做功能
+  const handleRedo = useCallback(() => {
+    if (historyStep.current === history.current.length - 1) {
+      return;
+    }
+    historyStep.current += 1;
+    const nextObjects = history.current[historyStep.current];
+    setCanvasState(prev => ({
+      ...prev,
+      objects: nextObjects,
+      selectedObjects: [], // 重做时清空选择
+    }));
+  }, []);
+
   // 更新画布尺寸
   React.useEffect(() => {
     const updateSize = () => {
@@ -177,17 +219,28 @@ const AnnotationEditor: React.FC = () => {
 
   // 删除选中对象
   const handleDeleteSelected = useCallback(() => {
+    if (canvasState.selectedObjects.length === 0) return;
+    
+    const newObjects = canvasState.objects.filter(obj => !canvasState.selectedObjects.includes(obj.id));
+    saveToHistory(newObjects);
     setCanvasState(prev => ({
       ...prev,
-      objects: prev.objects.filter(obj => !prev.selectedObjects.includes(obj.id)),
+      objects: newObjects,
       selectedObjects: [],
     }));
-  }, []);
+  }, [canvasState.objects, canvasState.selectedObjects, saveToHistory]);
 
   // 键盘事件
   React.useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'Delete' || e.key === 'Backspace') {
+      // 撤销和重做快捷键
+      if ((e.ctrlKey || e.metaKey) && e.key === 'z' && !e.shiftKey) {
+        e.preventDefault();
+        handleUndo();
+      } else if ((e.ctrlKey || e.metaKey) && (e.key === 'y' || (e.key === 'z' && e.shiftKey))) {
+        e.preventDefault();
+        handleRedo();
+      } else if (e.key === 'Delete' || e.key === 'Backspace') {
         handleDeleteSelected();
       } else if (e.code === 'Space' && !isSpacePressed) {
         e.preventDefault();
@@ -210,7 +263,7 @@ const AnnotationEditor: React.FC = () => {
       window.removeEventListener('keydown', handleKeyDown);
       window.removeEventListener('keyup', handleKeyUp);
     };
-  }, [handleDeleteSelected, isSpacePressed]);
+  }, [handleDeleteSelected, isSpacePressed, handleUndo, handleRedo]);
 
   // 鼠标按下事件
   const handleMouseDown = useCallback((e: Konva.KonvaEventObject<MouseEvent>) => {
@@ -341,14 +394,16 @@ const AnnotationEditor: React.FC = () => {
 
     if (!isDrawing || !currentDrawing) return;
 
+    const newObjects = [...canvasState.objects, currentDrawing];
+    saveToHistory(newObjects);
     setCanvasState(prev => ({
       ...prev,
-      objects: [...prev.objects, currentDrawing],
+      objects: newObjects,
     }));
 
     setIsDrawing(false);
     setCurrentDrawing(null);
-  }, [isDrawing, currentDrawing, isDragging]);
+  }, [isDrawing, currentDrawing, isDragging, canvasState.objects, saveToHistory]);
 
   // 对象选择
   const handleObjectSelect = useCallback((id: string) => {
@@ -360,21 +415,24 @@ const AnnotationEditor: React.FC = () => {
 
   // 图层管理函数
   const handleObjectsUpdate = useCallback((updatedObjects: AnnotationObject[]) => {
+    saveToHistory(updatedObjects);
     setCanvasState(prev => ({
       ...prev,
       objects: updatedObjects,
     }));
-  }, []);
+  }, [saveToHistory]);
 
   // 对象更新
   const handleObjectUpdate = useCallback((id: string, updates: Partial<AnnotationObject>) => {
+    const newObjects = canvasState.objects.map(obj =>
+      obj.id === id ? { ...obj, ...updates } : obj
+    );
+    saveToHistory(newObjects);
     setCanvasState(prev => ({
       ...prev,
-      objects: prev.objects.map(obj =>
-        obj.id === id ? { ...obj, ...updates } : obj
-      ),
+      objects: newObjects,
     }));
-  }, []);
+  }, [canvasState.objects, saveToHistory]);
 
   const selectedObject = canvasState.objects.find(obj => 
     canvasState.selectedObjects.includes(obj.id)
@@ -392,6 +450,10 @@ const AnnotationEditor: React.FC = () => {
         onZoom={handleZoom}
         onImageLoad={handleImageLoad}
         onDownload={handleDownload}
+        onUndo={handleUndo}
+        onRedo={handleRedo}
+        canUndo={historyStep.current > 0}
+        canRedo={historyStep.current < history.current.length - 1}
         fileInputRef={fileInputRef}
       />
       
@@ -463,24 +525,7 @@ const AnnotationEditor: React.FC = () => {
 
                 setCurrentDrawing(updatedObject);
               }}
-              onMouseup={() => {
-                // 如果正在拖拽画布，停止拖拽
-                if (isDragging) {
-                  setIsDragging(false);
-                  setLastPointerPosition(null);
-                  return;
-                }
-
-                if (!isDrawing || !currentDrawing) return;
-
-                setCanvasState(prev => ({
-                  ...prev,
-                  objects: [...prev.objects, currentDrawing],
-                }));
-
-                setIsDrawing(false);
-                setCurrentDrawing(null);
-              }}
+              onMouseup={handleMouseUp}
               onWheel={(e) => {
                 // 只有按住 Ctrl 键时才进行缩放
                 if (e.evt.ctrlKey || e.evt.metaKey) {

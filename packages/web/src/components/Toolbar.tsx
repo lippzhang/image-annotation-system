@@ -19,6 +19,10 @@ interface ToolbarProps {
   onZoom: (delta: number) => void;
   onImageLoad: (backgroundImage: BackgroundImage) => void;
   onDownload: () => void;
+  onUndo: () => void;
+  onRedo: () => void;
+  canUndo: boolean;
+  canRedo: boolean;
   fileInputRef?: React.RefObject<HTMLInputElement>;
 }
 
@@ -29,6 +33,10 @@ const Toolbar: React.FC<ToolbarProps> = ({
   onZoom,
   onImageLoad,
   onDownload,
+  onUndo,
+  onRedo,
+  canUndo,
+  canRedo,
   fileInputRef,
 }) => {
   return (
@@ -47,10 +55,20 @@ const Toolbar: React.FC<ToolbarProps> = ({
       <div className="toolbar-separator" />
 
       <div className="toolbar-group">
-        <button className="toolbar-button" title="撤销">
+        <button 
+          className={`toolbar-button ${!canUndo ? 'disabled' : ''}`} 
+          title="撤销 (Ctrl+Z)"
+          onClick={onUndo}
+          disabled={!canUndo}
+        >
           <Undo size={16} />
         </button>
-        <button className="toolbar-button" title="重做">
+        <button 
+          className={`toolbar-button ${!canRedo ? 'disabled' : ''}`} 
+          title="重做 (Ctrl+Y)"
+          onClick={onRedo}
+          disabled={!canRedo}
+        >
           <Redo size={16} />
         </button>
       </div>
