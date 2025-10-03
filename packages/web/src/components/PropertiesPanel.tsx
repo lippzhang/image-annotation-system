@@ -1,6 +1,22 @@
 import React from 'react';
 import { Settings, Layers } from 'lucide-react';
+import { ColorPicker } from 'antd';
 import { AnnotationObject } from '../types';
+
+export const COLOR_LIST = [
+  "#ffffff",
+  "#bec0bf",
+  "#595b5b",
+  "#010101",
+  "#a287e1",
+  "#7081db",
+  "#8ecaca",
+  "#fe6a04",
+  "#78c286",
+  "#e38483",
+  "#e382d4",
+  "#df2c3f"
+];
 
 interface PropertiesPanelProps {
   selectedObject?: AnnotationObject;
@@ -72,6 +88,24 @@ const PropertiesPanel: React.FC<PropertiesPanelProps> = ({
                     }}
                   />
                 </div>
+
+                <div style={{ marginBottom: '16px' }}>
+                  <label style={{ display: 'block', marginBottom: '4px', fontSize: '12px', color: '#666' }}>
+                    字体颜色
+                  </label>
+                  <ColorPicker
+                    value={selectedObject.fill || '#333333'}
+                    onChange={(color) => onObjectUpdate({ fill: color.toHexString() })}
+                    presets={[
+                      {
+                        label: '预设颜色',
+                        colors: COLOR_LIST,
+                      },
+                    ]}
+                    showText
+                    style={{ width: '100%' }}
+                  />
+                </div>
               </>
             )}
 
@@ -79,17 +113,17 @@ const PropertiesPanel: React.FC<PropertiesPanelProps> = ({
               <label style={{ display: 'block', marginBottom: '4px', fontSize: '12px', color: '#666' }}>
                 描边颜色
               </label>
-              <input
-                type="color"
+              <ColorPicker
                 value={selectedObject.stroke || '#ff8c00'}
-                onChange={(e) => onObjectUpdate({ stroke: e.target.value })}
-                style={{
-                  width: '100%',
-                  height: '32px',
-                  border: '1px solid #d9d9d9',
-                  borderRadius: '4px',
-                  cursor: 'pointer',
-                }}
+                onChange={(color) => onObjectUpdate({ stroke: color.toHexString() })}
+                presets={[
+                  {
+                    label: '预设颜色',
+                    colors: COLOR_LIST,
+                  },
+                ]}
+                showText
+                style={{ width: '100%' }}
               />
             </div>
 
