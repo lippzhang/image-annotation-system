@@ -149,17 +149,6 @@ const Toolbar: React.FC<ToolbarProps> = ({
               }}
             />
           </Tooltip>
-          <Tooltip title="图层">
-            <Button 
-              type="text"
-              icon={<Layers size={16} />}
-              size="small"
-              style={{ 
-                borderRadius: '8px',
-                color: '#495057'
-              }}
-            />
-          </Tooltip>
 
           <Divider type="vertical" style={{ height: '16px', margin: '0 4px' }} />
 

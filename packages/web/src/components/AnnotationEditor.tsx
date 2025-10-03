@@ -361,6 +361,14 @@ const AnnotationEditor: React.FC = () => {
       newObject.stroke = '#666666'; // 灰色边框
       newObject.strokeWidth = 1;
       newObject.mosaicSize = 10; // 默认马赛克像素大小
+    } else if (canvasState.selectedTool === 'gradient') {
+      // 渐变工具：创建矩形区域
+      newObject.width = 200; // 默认宽度
+      newObject.height = 150; // 默认高度
+      newObject.gradientColors = ['#ff6b6b', '#4ecdc4']; // 默认渐变颜色
+      newObject.gradientDirection = 'horizontal'; // 默认水平渐变
+      newObject.stroke = '#cccccc'; // 浅灰色边框
+      newObject.strokeWidth = 1;
     }
 
     setCurrentDrawing(newObject);
@@ -413,6 +421,10 @@ const AnnotationEditor: React.FC = () => {
       return;
     } else if (currentDrawing.type === 'mosaic') {
       // 马赛克工具：调整矩形大小
+      updatedObject.width = adjustedPos.x - currentDrawing.x;
+      updatedObject.height = adjustedPos.y - currentDrawing.y;
+    } else if (currentDrawing.type === 'gradient') {
+      // 渐变工具：调整矩形大小
       updatedObject.width = adjustedPos.x - currentDrawing.x;
       updatedObject.height = adjustedPos.y - currentDrawing.y;
     }

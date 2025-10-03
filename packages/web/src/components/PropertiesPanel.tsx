@@ -244,6 +244,130 @@ const PropertiesPanel: React.FC<PropertiesPanelProps> = ({
             </>
           )}
 
+          {/* 渐变工具专属属性 */}
+          {selectedObject.type === 'gradient' && (
+            <>
+              <div>
+                <Text type="secondary" style={{ fontSize: '12px', display: 'block', marginBottom: 4 }}>
+                  渐变方向
+                </Text>
+                <Space.Compact style={{ width: '100%' }}>
+                  <button
+                    style={{
+                      width: '33.33%',
+                      padding: '4px 8px',
+                      border: '1px solid #d9d9d9',
+                      backgroundColor: selectedObject.gradientDirection === 'horizontal' ? '#1890ff' : '#fff',
+                      color: selectedObject.gradientDirection === 'horizontal' ? '#fff' : '#000',
+                      cursor: 'pointer'
+                    }}
+                    onClick={() => onObjectUpdate({ gradientDirection: 'horizontal' })}
+                  >
+                    水平
+                  </button>
+                  <button
+                    style={{
+                      width: '33.33%',
+                      padding: '4px 8px',
+                      border: '1px solid #d9d9d9',
+                      backgroundColor: selectedObject.gradientDirection === 'vertical' ? '#1890ff' : '#fff',
+                      color: selectedObject.gradientDirection === 'vertical' ? '#fff' : '#000',
+                      cursor: 'pointer'
+                    }}
+                    onClick={() => onObjectUpdate({ gradientDirection: 'vertical' })}
+                  >
+                    垂直
+                  </button>
+                  <button
+                    style={{
+                      width: '33.33%',
+                      padding: '4px 8px',
+                      border: '1px solid #d9d9d9',
+                      backgroundColor: selectedObject.gradientDirection === 'diagonal' ? '#1890ff' : '#fff',
+                      color: selectedObject.gradientDirection === 'diagonal' ? '#fff' : '#000',
+                      cursor: 'pointer'
+                    }}
+                    onClick={() => onObjectUpdate({ gradientDirection: 'diagonal' })}
+                  >
+                    对角
+                  </button>
+                </Space.Compact>
+              </div>
+
+              <div>
+                <Text type="secondary" style={{ fontSize: '12px', display: 'block', marginBottom: 4 }}>
+                  起始颜色
+                </Text>
+                <ColorPicker
+                  value={(selectedObject.gradientColors && selectedObject.gradientColors[0]) || '#ff6b6b'}
+                  onChange={(color) => {
+                    const currentColors = selectedObject.gradientColors || ['#ff6b6b', '#4ecdc4'];
+                    const newColors = [...currentColors];
+                    newColors[0] = color.toHexString();
+                    onObjectUpdate({ gradientColors: newColors });
+                  }}
+                  presets={[
+                    {
+                      label: '预设颜色',
+                      colors: COLOR_LIST,
+                    },
+                  ]}
+                  showText
+                  style={{ width: '100%' }}
+                />
+              </div>
+
+              <div>
+                <Text type="secondary" style={{ fontSize: '12px', display: 'block', marginBottom: 4 }}>
+                  结束颜色
+                </Text>
+                <ColorPicker
+                  value={(selectedObject.gradientColors && selectedObject.gradientColors[1]) || '#4ecdc4'}
+                  onChange={(color) => {
+                    const currentColors = selectedObject.gradientColors || ['#ff6b6b', '#4ecdc4'];
+                    const newColors = [...currentColors];
+                    newColors[1] = color.toHexString();
+                    onObjectUpdate({ gradientColors: newColors });
+                  }}
+                  presets={[
+                    {
+                      label: '预设颜色',
+                      colors: COLOR_LIST,
+                    },
+                  ]}
+                  showText
+                  style={{ width: '100%' }}
+                />
+              </div>
+              
+              <div>
+                <Text type="secondary" style={{ fontSize: '12px', display: 'block', marginBottom: 4 }}>
+                  区域大小
+                </Text>
+                <Space.Compact style={{ width: '100%' }}>
+                  <InputNumber
+                    addonBefore="宽度"
+                    value={Math.round(selectedObject.width || 200)}
+                    onChange={(value) => onObjectUpdate({ width: value || 200 })}
+                    min={50}
+                    max={800}
+                    style={{ width: '50%' }}
+                    addonAfter="px"
+                  />
+                  <InputNumber
+                    addonBefore="高度"
+                    value={Math.round(selectedObject.height || 150)}
+                    onChange={(value) => onObjectUpdate({ height: value || 150 })}
+                    min={50}
+                    max={600}
+                    style={{ width: '50%' }}
+                    addonAfter="px"
+                  />
+                </Space.Compact>
+              </div>
+            </>
+          )}
+
           <Divider style={{ margin: '8px 0' }} />
 
           {/* 通用属性 */}

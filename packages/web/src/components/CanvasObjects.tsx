@@ -109,6 +109,14 @@ const CanvasObjects: React.FC<CanvasObjectsProps> = ({
           width: newSize,
           height: newSize,
         });
+      } else if (obj.type === 'gradient') {
+        // 渐变工具变换处理
+        onObjectUpdate(id, {
+          x: node.x(),
+          y: node.y(),
+          width: Math.max(50, (obj.width || 0) * scaleX),
+          height: Math.max(50, (obj.height || 0) * scaleY),
+        });
       }
     }
   };
@@ -433,6 +441,53 @@ const CanvasObjects: React.FC<CanvasObjectsProps> = ({
               return pixels;
             })()}
           </Group>
+        );
+
+      case 'gradient':
+        return (
+          <Rect
+            key={obj.id}
+            {...commonProps}
+            width={Math.abs(obj.width || 0)}
+            height={Math.abs(obj.height || 0)}
+            fillLinearGradientStartPoint={(() => {
+              const direction = obj.gradientDirection || 'horizontal';
+              const width = Math.abs(obj.width || 0);
+              const height = Math.abs(obj.height || 0);
+              
+              switch (direction) {
+                case 'vertical':
+                  return { x: 0, y: 0 };
+                case 'diagonal':
+                  return { x: 0, y: 0 };
+                default: // horizontal
+                  return { x: 0, y: 0 };
+              }
+            })()}
+            fillLinearGradientEndPoint={(() => {
+              const direction = obj.gradientDirection || 'horizontal';
+              const width = Math.abs(obj.width || 0);
+              const height = Math.abs(obj.height || 0);
+              
+              switch (direction) {
+                case 'vertical':
+                  return { x: 0, y: height };
+                case 'diagonal':
+                  return { x: width, y: height };
+                default: // horizontal
+                  return { x: width, y: 0 };
+              }
+            })()}
+            fillLinearGradientColorStops={(() => {
+              const colors = obj.gradientColors || ['#ff6b6b', '#4ecdc4'];
+              const stops = [];
+              for (let i = 0; i < colors.length; i++) {
+                stops.push(i / (colors.length - 1), colors[i]);
+              }
+              return stops;
+            })()}
+            dash={isLocked ? [5, 5] : undefined}
+          />
         );
 
       default:

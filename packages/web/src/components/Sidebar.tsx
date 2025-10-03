@@ -37,7 +37,7 @@ const toolCategories = [
     tools: [
       { label: '贴图', icon: <Image size={20} /> },
       { type: 'mosaic' as ToolType, label: '马赛克', icon: <Grid size={20} /> },
-      { label: '渐变背景', icon: <Palette size={20} /> },
+      { type: 'gradient' as ToolType, label: '渐变背景', icon: <Palette size={20} /> },
     ]
   },
 ];

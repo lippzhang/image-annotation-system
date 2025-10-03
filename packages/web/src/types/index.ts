@@ -19,7 +19,8 @@ export type ToolType =
   | 'pen'
   | 'eraser'
   | 'step'
-  | 'mosaic';
+  | 'mosaic'
+  | 'gradient';
 
 export interface AnnotationObject {
   id: string;
@@ -42,6 +43,9 @@ export interface AnnotationObject {
   stepNumber?: number;
   // 马赛克工具专用属性
   mosaicSize?: number; // 马赛克像素大小
+  // 渐变工具专用属性
+  gradientColors?: string[]; // 渐变颜色数组
+  gradientDirection?: 'horizontal' | 'vertical' | 'diagonal'; // 渐变方向
   // 图层相关属性
   zIndex?: number;
   locked?: boolean;
