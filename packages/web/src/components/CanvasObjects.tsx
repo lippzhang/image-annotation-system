@@ -1,5 +1,5 @@
 import React, { useRef, useEffect, useState } from 'react';
-import { Rect, Circle, Line, Text, Arrow, Group, Transformer } from 'react-konva';
+import { Rect, Circle, Line, Text, Arrow, Group, Transformer, Image } from 'react-konva';
 import { AnnotationObject } from '../types';
 import Konva from 'konva';
 import TextEditor from './TextEditor';
@@ -155,7 +155,7 @@ const CanvasObjects: React.FC<CanvasObjectsProps> = ({
     // 如果对象不可见，不渲染
     if (obj.visible === false) return null;
     
-    const isLocked = obj.locked;
+    const isLocked = obj.locked || false;
     const isEditing = editingTextId === obj.id;
     
     const commonProps = {
@@ -490,6 +490,16 @@ const CanvasObjects: React.FC<CanvasObjectsProps> = ({
           />
         );
 
+      case 'image':
+        return (
+          <ImageComponent
+            key={obj.id}
+            obj={obj}
+            commonProps={commonProps}
+            isLocked={isLocked}
+          />
+        );
+
       default:
         return null;
     }
@@ -509,6 +519,50 @@ const CanvasObjects: React.FC<CanvasObjectsProps> = ({
         }}
       />
     </>
+  );
+};
+
+// 贴图组件
+const ImageComponent: React.FC<{
+  obj: AnnotationObject;
+  commonProps: any;
+  isLocked: boolean;
+}> = ({ obj, commonProps, isLocked }) => {
+  const [image, setImage] = useState<HTMLImageElement | null>(null);
+
+  useEffect(() => {
+    if (obj.imageData) {
+      const img = new window.Image();
+      img.onload = () => {
+        setImage(img);
+      };
+      img.src = obj.imageData;
+    }
+  }, [obj.imageData]);
+
+  if (!image) {
+    // 图片加载中，显示占位符
+    return (
+      <Rect
+        {...commonProps}
+        width={obj.width || 100}
+        height={obj.height || 100}
+        fill="rgba(200, 200, 200, 0.5)"
+        stroke="#ccc"
+        strokeWidth={1}
+        dash={[5, 5]}
+      />
+    );
+  }
+
+  return (
+    <Image
+      {...commonProps}
+      image={image}
+      width={obj.width || 100}
+      height={obj.height || 100}
+      opacity={isLocked ? 0.7 : 1}
+    />
   );
 };
 

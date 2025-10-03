@@ -20,7 +20,8 @@ export type ToolType =
   | 'eraser'
   | 'step'
   | 'mosaic'
-  | 'gradient';
+  | 'gradient'
+  | 'image';
 
 export interface AnnotationObject {
   id: string;
@@ -46,6 +47,11 @@ export interface AnnotationObject {
   // 渐变工具专用属性
   gradientColors?: string[]; // 渐变颜色数组
   gradientDirection?: 'horizontal' | 'vertical' | 'diagonal'; // 渐变方向
+  // 贴图工具专用属性
+  imageUrl?: string; // 图片URL
+  imageData?: string; // 图片base64数据
+  imageWidth?: number; // 原始图片宽度
+  imageHeight?: number; // 原始图片高度
   // 图层相关属性
   zIndex?: number;
   locked?: boolean;

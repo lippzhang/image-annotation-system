@@ -87,7 +87,11 @@ const LayerPanel: React.FC<LayerPanelProps> = ({
       text: 'T',
       select: '⌖',
       eraser: '⌫',
-      measure: '📏'
+      measure: '📏',
+      step: '①',
+      mosaic: '▦',
+      gradient: '🎨',
+      image: '🖼️'
     };
     return icons[type] || '●';
   };

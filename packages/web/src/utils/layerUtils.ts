@@ -121,8 +121,14 @@ export const generateLayerName = (type: string, index: number): string => {
     text: '文本',
     select: '选择',
     eraser: '橡皮擦',
-    measure: '测量'
+    measure: '测量',
+    step: '步骤',
+    mosaic: '马赛克',
+    gradient: '渐变背景',
+    image: '贴图'
   };
   
-  return `${typeNames[type] || type} ${index}`;
+  // 确保 type 是字符串类型
+  const typeStr = typeof type === 'string' ? type : String(type);
+  return `${typeNames[typeStr] || typeStr} ${index}`;
 };

@@ -301,74 +301,105 @@ const AnnotationEditor: React.FC = () => {
       y: (pos.y - canvasState.pan.y) / canvasState.zoom,
     };
 
-    // 获取下一个 zIndex 和生成图层名称
-    const nextZIndex = getNextZIndex(canvasState.objects);
-    const layerName = generateLayerName(canvasState.selectedTool, canvasState.objects.length + 1);
-
+    // 创建新的标注对象
     const newObject: AnnotationObject = {
       id: generateId(),
       type: canvasState.selectedTool,
       x: adjustedPos.x,
       y: adjustedPos.y,
-      stroke: '#ff8c00',
-      strokeWidth: 6,
-      // 图层属性
-      zIndex: nextZIndex,
-      locked: false,
-      visible: true,
-      name: layerName,
+      zIndex: getNextZIndex(canvasState.objects),
+      name: generateLayerName(canvasState.selectedTool, canvasState.objects.length + 1),
     };
 
-    if (canvasState.selectedTool === 'rectangle' || canvasState.selectedTool === 'circle') {
-      newObject.width = 0;
-      newObject.height = 0;
-    } else if (canvasState.selectedTool === 'line' || canvasState.selectedTool === 'arrow') {
-      newObject.points = [adjustedPos.x, adjustedPos.y, adjustedPos.x, adjustedPos.y];
-    } else if (canvasState.selectedTool === 'pen') {
-      newObject.points = [adjustedPos.x, adjustedPos.y];
-    } else if (canvasState.selectedTool === 'text') {
+    // 根据工具类型设置特定属性
+    if (canvasState.selectedTool === 'text') {
       newObject.text = '文本';
       newObject.fontSize = 40;
       newObject.fontFamily = 'Arial';
       newObject.fill = '#333';
+      newObject.width = 100;
+      newObject.height = 50;
+    } else if (canvasState.selectedTool === 'rectangle') {
+      newObject.width = 0;
+      newObject.height = 0;
+      newObject.fill = 'transparent';
+      newObject.stroke = '#1890ff';
+      newObject.strokeWidth = 2;
+    } else if (canvasState.selectedTool === 'circle') {
+      newObject.width = 0;
+      newObject.height = 0;
+      newObject.fill = 'transparent';
+      newObject.stroke = '#1890ff';
+      newObject.strokeWidth = 2;
+    } else if (canvasState.selectedTool === 'line' || canvasState.selectedTool === 'arrow') {
+      newObject.points = [adjustedPos.x, adjustedPos.y, adjustedPos.x, adjustedPos.y];
+      newObject.stroke = '#1890ff';
+      newObject.strokeWidth = 2;
+    } else if (canvasState.selectedTool === 'pen') {
+      newObject.points = [adjustedPos.x, adjustedPos.y];
+      newObject.stroke = '#1890ff';
+      newObject.strokeWidth = 2;
     } else if (canvasState.selectedTool === 'step') {
-      // 步骤工具：自动分配下一个步骤编号
-      const existingStepNumbers = canvasState.objects
-        .filter(obj => obj.type === 'step' && obj.stepNumber)
-        .map(obj => obj.stepNumber!)
-        .sort((a, b) => a - b);
-      
-      let nextStepNumber = 1;
-      for (const num of existingStepNumbers) {
-        if (num === nextStepNumber) {
-          nextStepNumber++;
-        } else {
-          break;
-        }
-      }
-      
-      newObject.stepNumber = nextStepNumber;
-      newObject.width = 40; // 圆圈直径
+      // 步骤工具：创建带数字的圆圈
+      const stepNumber = canvasState.objects.filter(obj => obj.type === 'step').length + 1;
+      newObject.stepNumber = stepNumber;
+      newObject.width = 40;
       newObject.height = 40;
-      newObject.stroke = '#ff4d4f'; // 红色边框
-      newObject.fill = '#ffffff'; // 白色填充
+      newObject.fill = '#ffffff';
+      newObject.stroke = '#ff4d4f';
       newObject.strokeWidth = 2;
     } else if (canvasState.selectedTool === 'mosaic') {
-      // 马赛克工具：创建矩形区域
-      newObject.width = 100; // 默认宽度
-      newObject.height = 100; // 默认高度
-      newObject.fill = 'rgba(128, 128, 128, 0.8)'; // 半透明灰色表示马赛克区域
-      newObject.stroke = '#666666'; // 灰色边框
+      // 马赛克工具：创建马赛克矩形
+      newObject.width = 100; // 设置默认大小，避免0x0的问题
+      newObject.height = 100;
+      newObject.fill = 'rgba(128, 128, 128, 0.8)';
+      newObject.stroke = '#666666';
       newObject.strokeWidth = 1;
       newObject.mosaicSize = 10; // 默认马赛克像素大小
     } else if (canvasState.selectedTool === 'gradient') {
-      // 渐变工具：创建矩形区域
-      newObject.width = 200; // 默认宽度
-      newObject.height = 150; // 默认高度
+      // 渐变工具：创建渐变矩形
+      newObject.width = 200;
+      newObject.height = 100;
       newObject.gradientColors = ['#ff6b6b', '#4ecdc4']; // 默认渐变颜色
       newObject.gradientDirection = 'horizontal'; // 默认水平渐变
-      newObject.stroke = '#cccccc'; // 浅灰色边框
-      newObject.strokeWidth = 1;
+    } else if (canvasState.selectedTool === 'image') {
+      // 贴图工具：触发文件选择
+      const input = document.createElement('input');
+      input.type = 'file';
+      input.accept = 'image/*';
+      input.onchange = (event) => {
+        const file = (event.target as HTMLInputElement).files?.[0];
+        if (file) {
+          const reader = new FileReader();
+          reader.onload = (e) => {
+            const imageData = e.target?.result as string;
+            const img = new Image();
+            img.onload = () => {
+              const imageObject: AnnotationObject = {
+                ...newObject,
+                imageData,
+                imageWidth: img.width,
+                imageHeight: img.height,
+                width: Math.min(img.width, 300), // 限制初始显示大小
+                height: Math.min(img.height, 300),
+              };
+              
+              const newObjects = [...canvasState.objects, imageObject];
+              saveToHistory(newObjects);
+              setCanvasState(prev => ({
+                ...prev,
+                objects: newObjects,
+                selectedTool: 'select',
+                selectedObjects: [imageObject.id],
+              }));
+            };
+            img.src = imageData;
+          };
+          reader.readAsDataURL(file);
+        }
+      };
+      input.click();
+      return; // 不进入绘制模式
     }
 
     setCurrentDrawing(newObject);
