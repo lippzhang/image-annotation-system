@@ -1,6 +1,6 @@
 
 export default {
-
+  base: '/image-annotation-system/',
   root: 'docs',
   title: '图片标注系统',
   description: '基于 React + Konva 的图片标注系统',
