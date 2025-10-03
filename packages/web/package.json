@@ -9,6 +9,7 @@
     "preview": "rsbuild preview"
   },
   "dependencies": {
+    "@ant-design/icons": "^6.1.0",
     "antd": "^5.27.4",
     "clsx": "^2.0.0",
     "konva": "^9.2.0",

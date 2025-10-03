@@ -1,6 +1,19 @@
 import React from 'react';
-import { Tooltip } from 'antd';
+import { Tooltip, Card, Typography, Button, Space, List, Empty } from 'antd';
+import { 
+  EyeOutlined, 
+  EyeInvisibleOutlined, 
+  LockOutlined, 
+  UnlockOutlined,
+  DeleteOutlined,
+  ArrowUpOutlined,
+  ArrowDownOutlined,
+  VerticalAlignTopOutlined,
+  VerticalAlignBottomOutlined
+} from '@ant-design/icons';
 import { AnnotationObject } from '../types';
+
+const { Title, Text } = Typography;
 import { 
   moveToTop, 
   moveToBottom, 
@@ -86,132 +99,163 @@ const LayerPanel: React.FC<LayerPanelProps> = ({
 
   if (objects.length === 0) {
     return (
-      <div className="layer-panel">
-        <div className="layer-panel-header">
-          <h3>图层</h3>
-        </div>
-        <div className="layer-panel-empty">
-          <p>暂无图层</p>
-        </div>
-      </div>
+      <Card 
+        title={<Title level={5} style={{ margin: 0 }}>图层</Title>}
+        size="small"
+        style={{ width: '100%', height: '100%' }}
+      >
+        <Empty 
+          description="暂无图层"
+          image={Empty.PRESENTED_IMAGE_SIMPLE}
+          style={{ margin: '20px 0' }}
+        />
+      </Card>
     );
   }
 
   return (
-    <div className="layer-panel">
-      <div className="layer-panel-header">
-        <h3>图层</h3>
-      </div>
-      <div className="layer-list">
-        {sortedObjects.map((obj, index) => (
-          <div
+    <Card 
+      title={<Title level={5} style={{ margin: 0 }}>图层</Title>}
+      size="small"
+      style={{ width: '100%', height: '100%' }}
+      bodyStyle={{ padding: 0 }}
+    >
+      <List
+        size="small"
+        dataSource={sortedObjects}
+        renderItem={(obj, index) => (
+          <List.Item
             key={obj.id}
-            className={`layer-item ${selectedObjects.includes(obj.id) ? 'selected' : ''} ${obj.visible === false ? 'hidden' : ''}`}
+            style={{
+              padding: '8px 12px',
+              cursor: 'pointer',
+              backgroundColor: selectedObjects.includes(obj.id) ? '#e6f7ff' : 'transparent',
+              opacity: obj.visible === false ? 0.5 : 1,
+              borderLeft: selectedObjects.includes(obj.id) ? '3px solid #1890ff' : '3px solid transparent'
+            }}
             onClick={() => onObjectSelect(obj.id)}
           >
-            <div className="layer-info">
-              <span className="layer-icon">{getLayerIcon(obj.type)}</span>
-              <span className="layer-name">{getLayerName(obj, index)}</span>
-            </div>
-            
-            <div className="layer-controls">
-              {/* 可见性切换 */}
-              <Tooltip title={obj.visible === false ? '显示图层' : '隐藏图层'}>
-                <button
-                  className={`layer-btn visibility-btn ${obj.visible === false ? 'hidden' : ''}`}
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    handleToggleVisibility(obj.id);
-                  }}
-                >
-                  {obj.visible === false ? '👁️‍🗨️' : '👁️'}
-                </button>
-              </Tooltip>
-              
-              {/* 锁定切换 */}
-              <Tooltip title={obj.locked ? '解锁图层' : '锁定图层'}>
-                <button
-                  className={`layer-btn lock-btn ${obj.locked ? 'locked' : ''}`}
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    handleToggleLock(obj.id);
-                  }}
-                >
-                  {obj.locked ? '🔒' : '🔓'}
-                </button>
-              </Tooltip>
-              
-              {/* 删除按钮 */}
-              <Tooltip title="删除图层">
-                <button
-                  className="layer-btn delete-btn"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    handleDeleteObject(obj.id);
-                  }}
-                >
-                  🗑️
-                </button>
-              </Tooltip>
-              
-              {/* 层级控制 */}
-              <div className="layer-order-controls">
-                <Tooltip title="向上移动一层">
-                  <button
-                    className="layer-btn order-btn"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      handleMoveUp(obj.id);
-                    }}
-                    disabled={index === 0}
-                  >
-                    ↑
-                  </button>
-                </Tooltip>
-                <Tooltip title="向下移动一层">
-                  <button
-                    className="layer-btn order-btn"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      handleMoveDown(obj.id);
-                    }}
-                    disabled={index === sortedObjects.length - 1}
-                  >
-                    ↓
-                  </button>
-                </Tooltip>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%' }}>
+              <div style={{ display: 'flex', alignItems: 'center', flex: 1 }}>
+                <Text style={{ marginRight: 8, fontSize: '14px' }}>{getLayerIcon(obj.type)}</Text>
+                <Text ellipsis style={{ flex: 1 }}>{getLayerName(obj, index)}</Text>
               </div>
               
-              {/* 更多操作 */}
-              <div className="layer-more-controls">
-                <Tooltip title="移动到顶层">
-                  <button
-                    className="layer-btn more-btn"
+              <Space size={4}>
+                {/* 可见性切换 */}
+                <Tooltip title={obj.visible === false ? '显示图层' : '隐藏图层'}>
+                  <Button
+                    type="text"
+                    size="small"
+                    icon={obj.visible === false ? <EyeInvisibleOutlined /> : <EyeOutlined />}
                     onClick={(e) => {
                       e.stopPropagation();
-                      handleMoveToTop(obj.id);
+                      handleToggleVisibility(obj.id);
                     }}
-                  >
-                    ⤴
-                  </button>
+                    style={{ 
+                      color: obj.visible === false ? '#d9d9d9' : '#1890ff',
+                      padding: '2px 4px'
+                    }}
+                  />
                 </Tooltip>
-                <Tooltip title="移动到底层">
-                  <button
-                    className="layer-btn more-btn"
+                
+                {/* 锁定切换 */}
+                <Tooltip title={obj.locked ? '解锁图层' : '锁定图层'}>
+                  <Button
+                    type="text"
+                    size="small"
+                    icon={obj.locked ? <LockOutlined /> : <UnlockOutlined />}
                     onClick={(e) => {
                       e.stopPropagation();
-                      handleMoveToBottom(obj.id);
+                      handleToggleLock(obj.id);
                     }}
-                  >
-                    ⤵
-                  </button>
+                    style={{ 
+                      color: obj.locked ? '#ff4d4f' : '#52c41a',
+                      padding: '2px 4px'
+                    }}
+                  />
                 </Tooltip>
-              </div>
+                
+                {/* 删除按钮 */}
+                <Tooltip title="删除图层">
+                  <Button
+                    type="text"
+                    size="small"
+                    icon={<DeleteOutlined />}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleDeleteObject(obj.id);
+                    }}
+                    style={{ 
+                      color: '#ff4d4f',
+                      padding: '2px 4px'
+                    }}
+                  />
+                </Tooltip>
+                
+                {/* 层级控制 */}
+                <Space.Compact>
+                  <Tooltip title="向上移动一层">
+                    <Button
+                      type="text"
+                      size="small"
+                      icon={<ArrowUpOutlined />}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleMoveUp(obj.id);
+                      }}
+                      disabled={index === 0}
+                      style={{ padding: '2px 4px' }}
+                    />
+                  </Tooltip>
+                  <Tooltip title="向下移动一层">
+                    <Button
+                      type="text"
+                      size="small"
+                      icon={<ArrowDownOutlined />}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleMoveDown(obj.id);
+                      }}
+                      disabled={index === sortedObjects.length - 1}
+                      style={{ padding: '2px 4px' }}
+                    />
+                  </Tooltip>
+                </Space.Compact>
+                
+                {/* 更多操作 */}
+                <Space.Compact>
+                  <Tooltip title="移动到顶层">
+                    <Button
+                      type="text"
+                      size="small"
+                      icon={<VerticalAlignTopOutlined />}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleMoveToTop(obj.id);
+                      }}
+                      style={{ padding: '2px 4px' }}
+                    />
+                  </Tooltip>
+                  <Tooltip title="移动到底层">
+                    <Button
+                      type="text"
+                      size="small"
+                      icon={<VerticalAlignBottomOutlined />}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleMoveToBottom(obj.id);
+                      }}
+                      style={{ padding: '2px 4px' }}
+                    />
+                  </Tooltip>
+                </Space.Compact>
+              </Space>
             </div>
-          </div>
-        ))}
-      </div>
-    </div>
+          </List.Item>
+        )}
+      />
+    </Card>
   );
 };
 

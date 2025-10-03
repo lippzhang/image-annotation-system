@@ -8,9 +8,12 @@ import {
   Settings,
   Home
 } from 'lucide-react';
+import { Button, Space, Divider, Typography, Tooltip } from 'antd';
 import { ToolType, BackgroundImage } from '../types';
 import ImageUploader from './ImageUploader';
 import ImageUrlInput from './ImageUrlInput';
+
+const { Text } = Typography;
 
 interface ToolbarProps {
   selectedTool: ToolType;
@@ -40,68 +43,109 @@ const Toolbar: React.FC<ToolbarProps> = ({
   fileInputRef,
 }) => {
   return (
-    <div className="toolbar">
-      <div className="toolbar-group">
-        <button className="toolbar-button" title="首页">
-          <Home size={16} />
-        </button>
+    <div className="toolbar" style={{ 
+      padding: '8px 16px', 
+      backgroundColor: '#fff', 
+      borderBottom: '1px solid #f0f0f0',
+      display: 'flex',
+      alignItems: 'center',
+      gap: '8px'
+    }}>
+      {/* 文件操作组 */}
+      <Space size="small">
+        <Tooltip title="首页">
+          <Button 
+            type="text" 
+            icon={<Home size={16} />}
+            size="small"
+          />
+        </Tooltip>
         <ImageUploader onImageLoad={onImageLoad} fileInputRef={fileInputRef} />
         <ImageUrlInput onImageLoad={onImageLoad} />
-        <button className="toolbar-button" title="下载" onClick={onDownload}>
-          <Download size={16} />
-        </button>
-      </div>
+        <Tooltip title="下载">
+          <Button 
+            type="text" 
+            icon={<Download size={16} />}
+            onClick={onDownload}
+            size="small"
+          />
+        </Tooltip>
+      </Space>
 
-      <div className="toolbar-separator" />
+      <Divider type="vertical" style={{ height: '20px' }} />
 
-      <div className="toolbar-group">
-        <button 
-          className={`toolbar-button ${!canUndo ? 'disabled' : ''}`} 
-          title="撤销 (Ctrl+Z)"
-          onClick={onUndo}
-          disabled={!canUndo}
-        >
-          <Undo size={16} />
-        </button>
-        <button 
-          className={`toolbar-button ${!canRedo ? 'disabled' : ''}`} 
-          title="重做 (Ctrl+Y)"
-          onClick={onRedo}
-          disabled={!canRedo}
-        >
-          <Redo size={16} />
-        </button>
-      </div>
+      {/* 编辑操作组 */}
+      <Space size="small">
+        <Tooltip title="撤销 (Ctrl+Z)">
+          <Button 
+            type="text" 
+            icon={<Undo size={16} />}
+            onClick={onUndo}
+            disabled={!canUndo}
+            size="small"
+          />
+        </Tooltip>
+        <Tooltip title="重做 (Ctrl+Y)">
+          <Button 
+            type="text" 
+            icon={<Redo size={16} />}
+            onClick={onRedo}
+            disabled={!canRedo}
+            size="small"
+          />
+        </Tooltip>
+      </Space>
 
-      <div className="toolbar-separator" />
+      <Divider type="vertical" style={{ height: '20px' }} />
 
-      <div className="zoom-control">
-        <button 
-          className="zoom-button" 
-          onClick={() => onZoom(-0.1)}
-          title="缩小"
-        >
-          <ZoomOut size={14} />
-        </button>
-        <div className="zoom-display">
+      {/* 缩放控制组 */}
+      <Space size="small" style={{ 
+        padding: '4px 8px', 
+        backgroundColor: '#f5f5f5', 
+        borderRadius: '6px',
+        border: '1px solid #d9d9d9'
+      }}>
+        <Tooltip title="缩小">
+          <Button 
+            type="text" 
+            icon={<ZoomOut size={14} />}
+            onClick={() => onZoom(-0.1)}
+            size="small"
+            style={{ padding: '0 4px' }}
+          />
+        </Tooltip>
+        <Text style={{ 
+          fontSize: '12px', 
+          fontWeight: 500,
+          minWidth: '40px',
+          textAlign: 'center',
+          color: '#666'
+        }}>
           {Math.round(zoom * 100)}%
-        </div>
-        <button 
-          className="zoom-button" 
-          onClick={() => onZoom(0.1)}
-          title="放大"
-        >
-          <ZoomIn size={14} />
-        </button>
-      </div>
+        </Text>
+        <Tooltip title="放大">
+          <Button 
+            type="text" 
+            icon={<ZoomIn size={14} />}
+            onClick={() => onZoom(0.1)}
+            size="small"
+            style={{ padding: '0 4px' }}
+          />
+        </Tooltip>
+      </Space>
 
-      <div className="toolbar-separator" />
+      <Divider type="vertical" style={{ height: '20px' }} />
 
-      <div className="toolbar-group">
-        <button className="toolbar-button" title="设置">
-          <Settings size={16} />
-        </button>
-      </div>
+      {/* 设置组 */}
+      <Space size="small">
+        <Tooltip title="设置">
+          <Button 
+            type="text" 
+            icon={<Settings size={16} />}
+            size="small"
+          />
+        </Tooltip>
+      </Space>
     </div>
   );
 };
