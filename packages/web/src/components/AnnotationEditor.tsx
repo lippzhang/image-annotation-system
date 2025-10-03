@@ -399,6 +399,9 @@ const AnnotationEditor: React.FC = () => {
     setCanvasState(prev => ({
       ...prev,
       objects: newObjects,
+      // 绘制完成后自动切换到选择工具，并选中刚绘制的对象
+      selectedTool: 'select',
+      selectedObjects: [currentDrawing.id],
     }));
 
     setIsDrawing(false);
