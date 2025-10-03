@@ -122,7 +122,7 @@ const LayerPanel: React.FC<LayerPanelProps> = ({
       title={<Title level={5} style={{ margin: 0 }}>图层</Title>}
       size="small"
       style={{ width: '100%', height: '100%' }}
-      bodyStyle={{ padding: 0 }}
+      styles={{ body: { padding: 0 } }}
     >
       <List
         size="small"
