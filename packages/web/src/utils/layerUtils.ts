@@ -105,6 +105,11 @@ export const sortObjectsByZIndex = (objects: AnnotationObject[]): AnnotationObje
   return [...objects].sort((a, b) => (a.zIndex || 0) - (b.zIndex || 0));
 };
 
+// 删除对象
+export const deleteObject = (objects: AnnotationObject[], targetId: string): AnnotationObject[] => {
+  return objects.filter(obj => obj.id !== targetId);
+};
+
 // 生成图层名称
 export const generateLayerName = (type: string, index: number): string => {
   const typeNames: { [key: string]: string } = {

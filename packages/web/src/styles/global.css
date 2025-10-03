@@ -391,6 +391,15 @@ body {
   color: #ff4d4f;
 }
 
+.delete-btn {
+  color: #ff4d4f;
+}
+
+.delete-btn:hover {
+  background-color: #fff2f0;
+  color: #ff7875;
+}
+
 .layer-order-controls {
   display: flex;
   flex-direction: column;

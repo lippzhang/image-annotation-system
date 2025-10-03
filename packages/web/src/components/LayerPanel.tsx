@@ -1,4 +1,5 @@
 import React from 'react';
+import { Tooltip } from 'antd';
 import { AnnotationObject } from '../types';
 import { 
   moveToTop, 
@@ -7,6 +8,7 @@ import {
   moveDown, 
   toggleLock, 
   toggleVisibility,
+  deleteObject,
   sortObjectsByZIndex,
   generateLayerName
 } from '../utils/layerUtils';
@@ -54,6 +56,11 @@ const LayerPanel: React.FC<LayerPanelProps> = ({
 
   const handleToggleVisibility = (id: string) => {
     const updatedObjects = toggleVisibility(objects, id);
+    onObjectsUpdate(updatedObjects);
+  };
+
+  const handleDeleteObject = (id: string) => {
+    const updatedObjects = deleteObject(objects, id);
     onObjectsUpdate(updatedObjects);
   };
 
@@ -109,77 +116,96 @@ const LayerPanel: React.FC<LayerPanelProps> = ({
             
             <div className="layer-controls">
               {/* 可见性切换 */}
-              <button
-                className={`layer-btn visibility-btn ${obj.visible === false ? 'hidden' : ''}`}
-                onClick={(e) => {
-                  e.stopPropagation();
-                  handleToggleVisibility(obj.id);
-                }}
-                title={obj.visible === false ? '显示图层' : '隐藏图层'}
-              >
-                {obj.visible === false ? '👁️‍🗨️' : '👁️'}
-              </button>
+              <Tooltip title={obj.visible === false ? '显示图层' : '隐藏图层'}>
+                <button
+                  className={`layer-btn visibility-btn ${obj.visible === false ? 'hidden' : ''}`}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleToggleVisibility(obj.id);
+                  }}
+                >
+                  {obj.visible === false ? '👁️‍🗨️' : '👁️'}
+                </button>
+              </Tooltip>
               
               {/* 锁定切换 */}
-              <button
-                className={`layer-btn lock-btn ${obj.locked ? 'locked' : ''}`}
-                onClick={(e) => {
-                  e.stopPropagation();
-                  handleToggleLock(obj.id);
-                }}
-                title={obj.locked ? '解锁图层' : '锁定图层'}
-              >
-                {obj.locked ? '🔒' : '🔓'}
-              </button>
+              <Tooltip title={obj.locked ? '解锁图层' : '锁定图层'}>
+                <button
+                  className={`layer-btn lock-btn ${obj.locked ? 'locked' : ''}`}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleToggleLock(obj.id);
+                  }}
+                >
+                  {obj.locked ? '🔒' : '🔓'}
+                </button>
+              </Tooltip>
+              
+              {/* 删除按钮 */}
+              <Tooltip title="删除图层">
+                <button
+                  className="layer-btn delete-btn"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleDeleteObject(obj.id);
+                  }}
+                >
+                  🗑️
+                </button>
+              </Tooltip>
               
               {/* 层级控制 */}
               <div className="layer-order-controls">
-                <button
-                  className="layer-btn order-btn"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    handleMoveUp(obj.id);
-                  }}
-                  title="向上移动一层"
-                  disabled={index === 0}
-                >
-                  ↑
-                </button>
-                <button
-                  className="layer-btn order-btn"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    handleMoveDown(obj.id);
-                  }}
-                  title="向下移动一层"
-                  disabled={index === sortedObjects.length - 1}
-                >
-                  ↓
-                </button>
+                <Tooltip title="向上移动一层">
+                  <button
+                    className="layer-btn order-btn"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleMoveUp(obj.id);
+                    }}
+                    disabled={index === 0}
+                  >
+                    ↑
+                  </button>
+                </Tooltip>
+                <Tooltip title="向下移动一层">
+                  <button
+                    className="layer-btn order-btn"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleMoveDown(obj.id);
+                    }}
+                    disabled={index === sortedObjects.length - 1}
+                  >
+                    ↓
+                  </button>
+                </Tooltip>
               </div>
               
               {/* 更多操作 */}
               <div className="layer-more-controls">
-                <button
-                  className="layer-btn more-btn"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    handleMoveToTop(obj.id);
-                  }}
-                  title="移动到顶层"
-                >
-                  ⤴
-                </button>
-                <button
-                  className="layer-btn more-btn"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    handleMoveToBottom(obj.id);
-                  }}
-                  title="移动到底层"
-                >
-                  ⤵
-                </button>
+                <Tooltip title="移动到顶层">
+                  <button
+                    className="layer-btn more-btn"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleMoveToTop(obj.id);
+                    }}
+                  >
+                    ⤴
+                  </button>
+                </Tooltip>
+                <Tooltip title="移动到底层">
+                  <button
+                    className="layer-btn more-btn"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleMoveToBottom(obj.id);
+                    }}
+                  >
+                    ⤵
+                  </button>
+                </Tooltip>
               </div>
             </div>
           </div>
