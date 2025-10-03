@@ -18,7 +18,7 @@ export type ToolType =
   | 'line'
   | 'pen'
   | 'eraser'
-  | 'measure';
+  | 'step';
 
 export interface AnnotationObject {
   id: string;
@@ -37,6 +37,8 @@ export interface AnnotationObject {
   rotation?: number;
   scaleX?: number;
   scaleY?: number;
+  // 步骤工具专用属性
+  stepNumber?: number;
   // 图层相关属性
   zIndex?: number;
   locked?: boolean;

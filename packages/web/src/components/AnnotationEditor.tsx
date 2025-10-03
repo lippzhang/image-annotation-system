@@ -331,6 +331,28 @@ const AnnotationEditor: React.FC = () => {
       newObject.fontSize = 40;
       newObject.fontFamily = 'Arial';
       newObject.fill = '#333';
+    } else if (canvasState.selectedTool === 'step') {
+      // 步骤工具：自动分配下一个步骤编号
+      const existingStepNumbers = canvasState.objects
+        .filter(obj => obj.type === 'step' && obj.stepNumber)
+        .map(obj => obj.stepNumber!)
+        .sort((a, b) => a - b);
+      
+      let nextStepNumber = 1;
+      for (const num of existingStepNumbers) {
+        if (num === nextStepNumber) {
+          nextStepNumber++;
+        } else {
+          break;
+        }
+      }
+      
+      newObject.stepNumber = nextStepNumber;
+      newObject.width = 40; // 圆圈直径
+      newObject.height = 40;
+      newObject.stroke = '#ff4d4f'; // 红色边框
+      newObject.fill = '#ffffff'; // 白色填充
+      newObject.strokeWidth = 2;
     }
 
     setCurrentDrawing(newObject);
@@ -378,6 +400,9 @@ const AnnotationEditor: React.FC = () => {
       // 画笔工具：将新的点添加到轨迹中
       const currentPoints = currentDrawing.points || [];
       updatedObject.points = [...currentPoints, adjustedPos.x, adjustedPos.y];
+    } else if (currentDrawing.type === 'step') {
+      // 步骤工具不需要拖拽，保持原始大小
+      return;
     }
 
     setCurrentDrawing(updatedObject);

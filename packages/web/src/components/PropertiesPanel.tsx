@@ -102,6 +102,55 @@ const PropertiesPanel: React.FC<PropertiesPanelProps> = ({
             </>
           )}
 
+          {/* 步骤工具专属属性 */}
+          {selectedObject.type === 'step' && (
+            <>
+              <div>
+                <Text type="secondary" style={{ fontSize: '12px', display: 'block', marginBottom: 4 }}>
+                  步骤编号
+                </Text>
+                <InputNumber
+                  value={selectedObject.stepNumber || 1}
+                  onChange={(value) => onObjectUpdate({ stepNumber: value || 1 })}
+                  min={1}
+                  max={999}
+                  style={{ width: '100%' }}
+                />
+              </div>
+              
+              <div>
+                <Text type="secondary" style={{ fontSize: '12px', display: 'block', marginBottom: 4 }}>
+                  圆圈大小
+                </Text>
+                <Slider
+                  min={20}
+                  max={80}
+                  value={selectedObject.width || 40}
+                  onChange={(value) => onObjectUpdate({ width: value, height: value })}
+                  tooltip={{ formatter: (value) => `${value}px` }}
+                />
+              </div>
+
+              <div>
+                <Text type="secondary" style={{ fontSize: '12px', display: 'block', marginBottom: 4 }}>
+                  填充颜色
+                </Text>
+                <ColorPicker
+                  value={selectedObject.fill || '#ffffff'}
+                  onChange={(color) => onObjectUpdate({ fill: color.toHexString() })}
+                  presets={[
+                    {
+                      label: '预设颜色',
+                      colors: COLOR_LIST,
+                    },
+                  ]}
+                  showText
+                  style={{ width: '100%' }}
+                />
+              </div>
+            </>
+          )}
+
           <Divider style={{ margin: '8px 0' }} />
 
           {/* 通用属性 */}

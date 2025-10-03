@@ -7,7 +7,7 @@ import {
   Minus,
   Pen,
   Eraser,
-  Ruler,
+  CircleDot,
   Image,
   Grid,
   Palette
@@ -29,8 +29,7 @@ const toolCategories = [
       { type: 'line' as ToolType, label: '直线', icon: <Minus size={20} /> },
       { type: 'pen' as ToolType, label: '手写', icon: <Pen size={20} /> },
       { type: 'arrow' as ToolType, label: '箭头', icon: <ArrowRight size={20} /> },
-      { type: 'measure' as ToolType, label: '步骤', icon: <Ruler size={20} /> },
-      { type: 'eraser' as ToolType, label: '橡皮', icon: <Eraser size={20} /> },
+      { type: 'step' as ToolType, label: '步骤', icon: <CircleDot size={20} /> },
     ]
   },
   {

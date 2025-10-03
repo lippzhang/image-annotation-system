@@ -315,6 +315,36 @@ const CanvasObjects: React.FC<CanvasObjectsProps> = ({
           </React.Fragment>
         );
 
+      case 'step':
+        const radius = (obj.width || 40) / 2;
+        return (
+          <Group key={obj.id} {...commonProps}>
+            {/* 步骤圆圈背景 */}
+            <Circle
+              radius={radius}
+              fill={obj.fill || '#ffffff'}
+              stroke={obj.stroke || '#ff4d4f'}
+              strokeWidth={obj.strokeWidth || 2}
+              dash={isLocked ? [5, 5] : undefined}
+            />
+            {/* 步骤数字 */}
+            <Text
+              text={String(obj.stepNumber || 1)}
+              fontSize={radius * 0.8} // 根据圆圈大小调整字体
+              fontFamily="Arial"
+              fill={obj.stroke || '#ff4d4f'}
+              fontStyle="bold"
+              align="center"
+              verticalAlign="middle"
+              width={radius * 2}
+              height={radius * 2}
+              offsetX={radius}
+              offsetY={radius}
+              listening={false} // 数字文本不响应事件
+            />
+          </Group>
+        );
+
       default:
         return null;
     }
