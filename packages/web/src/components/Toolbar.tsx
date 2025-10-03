@@ -123,15 +123,15 @@ const Toolbar: React.FC<ToolbarProps> = ({
           {/* 选择和拖动工具 */}
           <Tooltip title="选择工具">
             <Button 
-              type={selectedTool === 'select' ? 'primary' : 'text'}
+              type={selectedTool === 'select' && !isSpacePressed ? 'primary' : 'text'}
               icon={<MousePointer size={16} />}
               onClick={() => onToolSelect('select')}
               size="small"
               style={{ 
                 borderRadius: '8px',
-                backgroundColor: selectedTool === 'select' ? '#ff9500' : 'transparent',
-                borderColor: selectedTool === 'select' ? '#ff9500' : 'transparent',
-                color: selectedTool === 'select' ? '#fff' : '#495057'
+                backgroundColor: selectedTool === 'select' && !isSpacePressed ? '#ff9500' : 'transparent',
+                borderColor: selectedTool === 'select' && !isSpacePressed ? '#ff9500' : 'transparent',
+                color: selectedTool === 'select' && !isSpacePressed ? '#fff' : '#495057'
               }}
             />
           </Tooltip>

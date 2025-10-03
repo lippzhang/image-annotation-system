@@ -25,7 +25,6 @@ const toolCategories = [
   {
     title: '基础',
     tools: [
-      { type: 'select' as ToolType, label: '选择', icon: <MousePointer2 size={20} /> },
       { type: 'text' as ToolType, label: '文字', icon: <Type size={20} /> },
       { type: 'rectangle' as ToolType, label: '矩形', icon: <Square size={20} /> },
       { type: 'circle' as ToolType, label: '圆形', icon: <Circle size={20} /> },
