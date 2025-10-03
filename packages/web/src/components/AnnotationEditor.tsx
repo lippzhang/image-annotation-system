@@ -270,8 +270,8 @@ const AnnotationEditor: React.FC = () => {
     const pos = e.target.getStage()?.getPointerPosition();
     if (!pos) return;
 
-    // 如果按住空格键，开始拖拽画布
-    if (isSpacePressed) {
+    // 如果按住空格键或选择了拖动工具，开始拖拽画布
+    if (isSpacePressed || canvasState.selectedTool === 'drag') {
       setIsDragging(true);
       setLastPointerPosition(pos);
       return;
@@ -455,6 +455,7 @@ const AnnotationEditor: React.FC = () => {
         canUndo={historyStep.current > 0}
         canRedo={historyStep.current < history.current.length - 1}
         fileInputRef={fileInputRef}
+        isSpacePressed={isSpacePressed}
       />
       
       <div className="editor-container">
@@ -466,7 +467,7 @@ const AnnotationEditor: React.FC = () => {
         <div 
           className={`canvas-container ${!canvasState.backgroundImage ? 'canvas-grid' : ''}`}
           style={{ 
-            cursor: isSpacePressed ? (isDragging ? 'grabbing' : 'grab') : 'default' 
+            cursor: (isSpacePressed || canvasState.selectedTool === 'drag') ? (isDragging ? 'grabbing' : 'grab') : 'default' 
           }}
         >
           {!canvasState.backgroundImage ? (

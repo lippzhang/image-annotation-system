@@ -10,6 +10,7 @@ export interface Size {
 
 export type ToolType = 
   | 'select'
+  | 'drag'
   | 'text'
   | 'rectangle'
   | 'circle'
