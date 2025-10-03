@@ -92,6 +92,23 @@ const CanvasObjects: React.FC<CanvasObjectsProps> = ({
           width: (obj.width || 0) * scaleX,
           height: (obj.height || 0) * scaleY,
         });
+      } else if (obj.type === 'mosaic') {
+        // 马赛克工具变换处理
+        onObjectUpdate(id, {
+          x: node.x(),
+          y: node.y(),
+          width: Math.max(20, (obj.width || 0) * scaleX),
+          height: Math.max(20, (obj.height || 0) * scaleY),
+        });
+      } else if (obj.type === 'step') {
+        // 步骤工具变换处理 - 保持圆形比例
+        const newSize = Math.max(20, Math.max((obj.width || 0) * scaleX, (obj.height || 0) * scaleY));
+        onObjectUpdate(id, {
+          x: node.x(),
+          y: node.y(),
+          width: newSize,
+          height: newSize,
+        });
       }
     }
   };
@@ -342,6 +359,79 @@ const CanvasObjects: React.FC<CanvasObjectsProps> = ({
               offsetY={radius}
               listening={false} // 数字文本不响应事件
             />
+          </Group>
+        );
+
+      case 'mosaic':
+        return (
+          <Group key={obj.id} {...commonProps}>
+            {/* 马赛克背景矩形 */}
+            <Rect
+              width={Math.abs(obj.width || 0)}
+              height={Math.abs(obj.height || 0)}
+              fill={obj.fill || 'rgba(128, 128, 128, 0.8)'}
+              stroke={obj.stroke || '#666666'}
+              strokeWidth={obj.strokeWidth || 1}
+              dash={isLocked ? [5, 5] : undefined}
+            />
+            {/* 马赛克像素效果 - 使用小方块模拟 */}
+            {(() => {
+              const mosaicSize = obj.mosaicSize || 10;
+              const width = Math.abs(obj.width || 0);
+              const height = Math.abs(obj.height || 0);
+              const cols = Math.ceil(width / mosaicSize);
+              const rows = Math.ceil(height / mosaicSize);
+              const pixels = [];
+              
+              // 解析用户设置的颜色
+              const baseColor = obj.fill || 'rgba(128, 128, 128, 0.8)';
+              let baseR = 128, baseG = 128, baseB = 128, baseA = 0.8;
+              
+              // 从 rgba 或 rgb 字符串中提取颜色值
+              const rgbaMatch = baseColor.match(/rgba?\(([^)]+)\)/);
+              if (rgbaMatch) {
+                const values = rgbaMatch[1].split(',').map(v => parseFloat(v.trim()));
+                baseR = values[0] || 128;
+                baseG = values[1] || 128;
+                baseB = values[2] || 128;
+                baseA = values[3] !== undefined ? values[3] : 1;
+              }
+              
+              for (let row = 0; row < rows; row++) {
+                for (let col = 0; col < cols; col++) {
+                  const pixelX = col * mosaicSize;
+                  const pixelY = row * mosaicSize;
+                  const pixelWidth = Math.min(mosaicSize, width - pixelX);
+                  const pixelHeight = Math.min(mosaicSize, height - pixelY);
+                  
+                  if (pixelWidth > 0 && pixelHeight > 0) {
+                    // 基于对象ID和像素位置生成稳定的随机变化
+                    const seed = obj.id.charCodeAt(0) + row * 31 + col * 17; // 使用对象ID和位置生成稳定的种子
+                    const pseudoRandom = (seed * 9301 + 49297) % 233280 / 233280; // 简单的伪随机数生成
+                    const variation = (pseudoRandom - 0.5) * 60; // -30 到 +30 的变化
+                    const pixelR = Math.max(0, Math.min(255, baseR + variation));
+                    const pixelG = Math.max(0, Math.min(255, baseG + variation));
+                    const pixelB = Math.max(0, Math.min(255, baseB + variation));
+                    
+                    pixels.push(
+                      <Rect
+                        key={`${row}-${col}`}
+                        x={pixelX}
+                        y={pixelY}
+                        width={pixelWidth}
+                        height={pixelHeight}
+                        fill={`rgba(${Math.round(pixelR)}, ${Math.round(pixelG)}, ${Math.round(pixelB)}, ${baseA})`}
+                        stroke="rgba(0,0,0,0.1)"
+                        strokeWidth={0.5}
+                        listening={false}
+                      />
+                    );
+                  }
+                }
+              }
+              
+              return pixels;
+            })()}
           </Group>
         );
 

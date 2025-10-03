@@ -36,7 +36,7 @@ const toolCategories = [
     title: '贴图',
     tools: [
       { label: '贴图', icon: <Image size={20} /> },
-      { label: '马赛克', icon: <Grid size={20} /> },
+      { type: 'mosaic' as ToolType, label: '马赛克', icon: <Grid size={20} /> },
       { label: '渐变背景', icon: <Palette size={20} /> },
     ]
   },
@@ -56,7 +56,7 @@ const Sidebar: React.FC<SidebarProps> = ({ selectedTool, onToolSelect }) => {
                   'type' in tool && tool.type === selectedTool ? 'active' : ''
                 }`}
                 onClick={() => {
-                  if ('type' in tool) {
+                  if ('type' in tool && tool.type) {
                     onToolSelect(tool.type);
                   }
                 }}

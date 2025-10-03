@@ -353,6 +353,14 @@ const AnnotationEditor: React.FC = () => {
       newObject.stroke = '#ff4d4f'; // 红色边框
       newObject.fill = '#ffffff'; // 白色填充
       newObject.strokeWidth = 2;
+    } else if (canvasState.selectedTool === 'mosaic') {
+      // 马赛克工具：创建矩形区域
+      newObject.width = 100; // 默认宽度
+      newObject.height = 100; // 默认高度
+      newObject.fill = 'rgba(128, 128, 128, 0.8)'; // 半透明灰色表示马赛克区域
+      newObject.stroke = '#666666'; // 灰色边框
+      newObject.strokeWidth = 1;
+      newObject.mosaicSize = 10; // 默认马赛克像素大小
     }
 
     setCurrentDrawing(newObject);
@@ -403,6 +411,10 @@ const AnnotationEditor: React.FC = () => {
     } else if (currentDrawing.type === 'step') {
       // 步骤工具不需要拖拽，保持原始大小
       return;
+    } else if (currentDrawing.type === 'mosaic') {
+      // 马赛克工具：调整矩形大小
+      updatedObject.width = adjustedPos.x - currentDrawing.x;
+      updatedObject.height = adjustedPos.y - currentDrawing.y;
     }
 
     setCurrentDrawing(updatedObject);

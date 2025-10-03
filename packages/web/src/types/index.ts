@@ -18,7 +18,8 @@ export type ToolType =
   | 'line'
   | 'pen'
   | 'eraser'
-  | 'step';
+  | 'step'
+  | 'mosaic';
 
 export interface AnnotationObject {
   id: string;
@@ -39,6 +40,8 @@ export interface AnnotationObject {
   scaleY?: number;
   // 步骤工具专用属性
   stepNumber?: number;
+  // 马赛克工具专用属性
+  mosaicSize?: number; // 马赛克像素大小
   // 图层相关属性
   zIndex?: number;
   locked?: boolean;

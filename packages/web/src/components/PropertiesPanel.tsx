@@ -151,6 +151,99 @@ const PropertiesPanel: React.FC<PropertiesPanelProps> = ({
             </>
           )}
 
+          {/* 马赛克工具专属属性 */}
+          {selectedObject.type === 'mosaic' && (
+            <>
+              <div>
+                <Text type="secondary" style={{ fontSize: '12px', display: 'block', marginBottom: 4 }}>
+                  马赛克大小
+                </Text>
+                <Slider
+                  min={5}
+                  max={30}
+                  value={selectedObject.mosaicSize || 10}
+                  onChange={(value) => onObjectUpdate({ mosaicSize: value })}
+                  tooltip={{ formatter: (value) => `${value}px` }}
+                />
+              </div>
+              
+              <div>
+                <Text type="secondary" style={{ fontSize: '12px', display: 'block', marginBottom: 4 }}>
+                  马赛克颜色
+                </Text>
+                <ColorPicker
+                  value={selectedObject.fill || 'rgba(128, 128, 128, 0.8)'}
+                  onChange={(color) => onObjectUpdate({ fill: color.toRgbString() })}
+                  presets={[
+                    {
+                      label: '预设颜色',
+                      colors: COLOR_LIST,
+                    },
+                  ]}
+                  showText
+                  style={{ width: '100%' }}
+                />
+              </div>
+
+              <div>
+                <Text type="secondary" style={{ fontSize: '12px', display: 'block', marginBottom: 4 }}>
+                  透明度
+                </Text>
+                <Slider
+                  min={0}
+                  max={100}
+                  value={(() => {
+                    const fillColor = selectedObject.fill || 'rgba(128, 128, 128, 0.8)';
+                    // 从 rgba 字符串中提取透明度值
+                    const match = fillColor.match(/rgba?\([^)]+,\s*([^)]+)\)/);
+                    if (match) {
+                      return Math.round(parseFloat(match[1]) * 100);
+                    }
+                    return 80; // 默认透明度 80%
+                  })()}
+                  onChange={(value) => {
+                    const fillColor = selectedObject.fill || 'rgba(128, 128, 128, 0.8)';
+                    // 提取 RGB 值
+                    const rgbMatch = fillColor.match(/rgba?\(([^)]+)\)/);
+                    if (rgbMatch) {
+                      const rgbValues = rgbMatch[1].split(',').slice(0, 3).map(v => v.trim());
+                      const newAlpha = value / 100;
+                      const newColor = `rgba(${rgbValues.join(', ')}, ${newAlpha})`;
+                      onObjectUpdate({ fill: newColor });
+                    }
+                  }}
+                  tooltip={{ formatter: (value) => `${value}%` }}
+                />
+              </div>
+              
+              <div>
+                <Text type="secondary" style={{ fontSize: '12px', display: 'block', marginBottom: 4 }}>
+                  区域大小
+                </Text>
+                <Space.Compact style={{ width: '100%' }}>
+                  <InputNumber
+                    addonBefore="宽度"
+                    value={Math.round(selectedObject.width || 100)}
+                    onChange={(value) => onObjectUpdate({ width: value || 100 })}
+                    min={20}
+                    max={500}
+                    style={{ width: '50%' }}
+                    addonAfter="px"
+                  />
+                  <InputNumber
+                    addonBefore="高度"
+                    value={Math.round(selectedObject.height || 100)}
+                    onChange={(value) => onObjectUpdate({ height: value || 100 })}
+                    min={20}
+                    max={500}
+                    style={{ width: '50%' }}
+                    addonAfter="px"
+                  />
+                </Space.Compact>
+              </div>
+            </>
+          )}
+
           <Divider style={{ margin: '8px 0' }} />
 
           {/* 通用属性 */}
