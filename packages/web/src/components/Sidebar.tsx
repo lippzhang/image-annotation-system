@@ -10,7 +10,9 @@ import {
   CircleDot,
   Image,
   Grid,
-  Palette
+  Palette,
+  Search,
+  ZoomIn
 } from 'lucide-react';
 import { ToolType } from '../types';
 
@@ -29,6 +31,13 @@ const toolCategories = [
       { type: 'pen' as ToolType, label: '手写', icon: <Pen size={20} /> },
       { type: 'arrow' as ToolType, label: '箭头', icon: <ArrowRight size={20} /> },
       { type: 'step' as ToolType, label: '步骤', icon: <CircleDot size={20} /> },
+    ]
+  },
+  {
+    title: '放大镜',
+    tools: [
+      { type: 'circle-magnifier' as ToolType, label: '圆放大镜', icon: <Search size={20} /> },
+      { type: 'square-magnifier' as ToolType, label: '方放大镜', icon: <ZoomIn size={20} /> },
     ]
   },
   {
