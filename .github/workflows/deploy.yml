@@ -69,8 +69,8 @@ jobs:
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          # 上传 website 构建输出目录
-          path: './packages/website/dist'
+          # 上传 website 构建输出目录 (RSPress 默认输出到 doc_build)
+          path: './packages/website/doc_build'
 
   # 部署作业
   deploy:
