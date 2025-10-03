@@ -130,6 +130,17 @@ body {
   color: #1890ff;
 }
 
+.tool-item.disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+  background-color: #f5f5f5;
+}
+
+.tool-item.disabled:hover {
+  border-color: #e5e5e5;
+  background-color: #f5f5f5;
+}
+
 .tool-item-icon {
   margin-bottom: 4px;
 }

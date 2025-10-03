@@ -20,6 +20,10 @@ interface SidebarProps {
   selectedTool: ToolType;
   onToolSelect: (tool: ToolType) => void;
 }
+
+// 未实现的工具类型
+const unimplementedTools: ToolType[] = ['circle-magnifier', 'square-magnifier'];
+
 const toolCategories = [
   {
     title: '基础',
@@ -57,22 +61,28 @@ const Sidebar: React.FC<SidebarProps> = ({ selectedTool, onToolSelect }) => {
         <div key={index} className="sidebar-section">
           <div className="sidebar-title">{category.title}</div>
           <div className="tool-grid">
-            {category.tools.map((tool, toolIndex) => (
-              <div
-                key={toolIndex}
-                className={`tool-item ${
-                  'type' in tool && tool.type === selectedTool ? 'active' : ''
-                }`}
-                onClick={() => {
-                  if ('type' in tool && tool.type) {
-                    onToolSelect(tool.type);
-                  }
-                }}
-              >
-                <div className="tool-item-icon">{tool.icon}</div>
-                <div className="tool-item-label">{tool.label}</div>
-              </div>
-            ))}
+            {category.tools.map((tool, toolIndex) => {
+              const isUnimplemented = 'type' in tool && unimplementedTools.includes(tool.type);
+              const isActive = 'type' in tool && tool.type === selectedTool;
+              
+              return (
+                <div
+                  key={toolIndex}
+                  className={`tool-item ${
+                    isActive ? 'active' : ''
+                  } ${isUnimplemented ? 'disabled' : ''}`}
+                  onClick={() => {
+                    if ('type' in tool && tool.type && !isUnimplemented) {
+                      onToolSelect(tool.type);
+                    }
+                  }}
+                  title={isUnimplemented ? '功能开发中...' : tool.label}
+                >
+                  <div className="tool-item-icon">{tool.icon}</div>
+                  <div className="tool-item-label">{tool.label}</div>
+                </div>
+              );
+            })}
           </div>
         </div>
       ))}

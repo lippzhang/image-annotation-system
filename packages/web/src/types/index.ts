@@ -21,7 +21,9 @@ export type ToolType =
   | 'step'
   | 'mosaic'
   | 'gradient'
-  | 'image';
+  | 'image'
+  | 'circle-magnifier'
+  | 'square-magnifier';
 
 export interface AnnotationObject {
   id: string;
