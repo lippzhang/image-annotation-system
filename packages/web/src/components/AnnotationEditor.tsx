@@ -272,7 +272,7 @@ const AnnotationEditor: React.FC = () => {
 
     setCurrentDrawing(newObject);
     setIsDrawing(true);
-  }, [canvasState.selectedTool, canvasState.zoom, canvasState.backgroundImage, isSpacePressed]);
+  }, [canvasState.selectedTool, canvasState.zoom, canvasState.backgroundImage, isSpacePressed, currentDrawing]);
 
   // 鼠标移动事件
   const handleMouseMove = useCallback((e: Konva.KonvaEventObject<MouseEvent>) => {

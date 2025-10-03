@@ -118,12 +118,17 @@ const CanvasObjects: React.FC<CanvasObjectsProps> = ({
 
       case 'line':
         return (
-          <Group 
-            key={`line-group-${obj.id}`}
-            draggable={true}
+          <Line
+            key={obj.id}
+            stroke={obj.stroke || '#1890ff'}
+            strokeWidth={obj.strokeWidth || 2}
+            points={obj.points || []}
+            lineCap="round"
+            lineJoin="round"
             onClick={() => onObjectSelect(obj.id)}
             onTap={() => onObjectSelect(obj.id)}
-            onDragEnd={(e) => {
+            draggable={true}
+            onDragEnd={(e: any) => {
               if (onObjectUpdate) {
                 const deltaX = e.target.x();
                 const deltaY = e.target.y();
@@ -139,6 +144,7 @@ const CanvasObjects: React.FC<CanvasObjectsProps> = ({
                   points: newPoints,
                 });
                 
+                // 重置位置
                 e.target.x(0);
                 e.target.y(0);
               }
@@ -148,32 +154,23 @@ const CanvasObjects: React.FC<CanvasObjectsProps> = ({
                 shapeRefs.current[obj.id] = node;
               }
             }}
-          >
-            <Line
-              stroke={obj.stroke || '#1890ff'}
-              strokeWidth={obj.strokeWidth || 2}
-              points={obj.points || []}
-              lineCap="round"
-              lineJoin="round"
-            />
-            <Line
-              stroke="transparent"
-              strokeWidth={Math.max(10, (obj.strokeWidth || 2) + 8)}
-              points={obj.points || []}
-              lineCap="round"
-              lineJoin="round"
-            />
-          </Group>
+          />
         );
 
       case 'arrow':
         return (
-          <Group 
-            key={`arrow-group-${obj.id}`}
-            draggable={true}
+          <Arrow
+            key={obj.id}
+            stroke={obj.stroke || '#1890ff'}
+            strokeWidth={obj.strokeWidth || 2}
+            points={obj.points || []}
+            pointerLength={10}
+            pointerWidth={10}
+            fill={obj.stroke || '#1890ff'}
             onClick={() => onObjectSelect(obj.id)}
             onTap={() => onObjectSelect(obj.id)}
-            onDragEnd={(e) => {
+            draggable={true}
+            onDragEnd={(e: any) => {
               if (onObjectUpdate) {
                 const deltaX = e.target.x();
                 const deltaY = e.target.y();
@@ -189,6 +186,7 @@ const CanvasObjects: React.FC<CanvasObjectsProps> = ({
                   points: newPoints,
                 });
                 
+                // 重置位置
                 e.target.x(0);
                 e.target.y(0);
               }
@@ -198,23 +196,7 @@ const CanvasObjects: React.FC<CanvasObjectsProps> = ({
                 shapeRefs.current[obj.id] = node;
               }
             }}
-          >
-            <Arrow
-              stroke={obj.stroke || '#1890ff'}
-              strokeWidth={obj.strokeWidth || 2}
-              points={obj.points || []}
-              pointerLength={10}
-              pointerWidth={10}
-              fill={obj.stroke || '#1890ff'}
-            />
-            <Line
-              stroke="transparent"
-              strokeWidth={Math.max(10, (obj.strokeWidth || 2) + 8)}
-              points={obj.points || []}
-              lineCap="round"
-              lineJoin="round"
-            />
-          </Group>
+          />
         );
 
       case 'pen':
