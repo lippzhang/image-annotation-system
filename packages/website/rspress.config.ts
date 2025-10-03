@@ -4,10 +4,10 @@ export default {
   root: 'docs',
   title: '图片标注系统',
   description: '基于 React + Konva 的图片标注系统',
-  icon: '/image-annotation-system/favicon.ico',
+  icon: '/favicon.ico',
   logo: {
-    light: '/image-annotation-system/logo.png',
-    dark: '/image-annotation-system/logo-dark.png',
+    light: '/logo.png',
+    dark: '/logo-dark.png',
   },
   themeConfig: {
     nav: [
