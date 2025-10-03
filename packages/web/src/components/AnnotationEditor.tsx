@@ -257,8 +257,8 @@ const AnnotationEditor: React.FC = () => {
       type: canvasState.selectedTool,
       x: adjustedPos.x,
       y: adjustedPos.y,
-      stroke: '#1890ff',
-      strokeWidth: 2,
+      stroke: '#ff8c00',
+      strokeWidth: 6,
       // 图层属性
       zIndex: nextZIndex,
       locked: false,

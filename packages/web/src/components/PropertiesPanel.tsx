@@ -81,7 +81,7 @@ const PropertiesPanel: React.FC<PropertiesPanelProps> = ({
               </label>
               <input
                 type="color"
-                value={selectedObject.stroke || '#1890ff'}
+                value={selectedObject.stroke || '#ff8c00'}
                 onChange={(e) => onObjectUpdate({ stroke: e.target.value })}
                 style={{
                   width: '100%',
@@ -101,12 +101,12 @@ const PropertiesPanel: React.FC<PropertiesPanelProps> = ({
                 type="range"
                 min="1"
                 max="10"
-                value={selectedObject.strokeWidth || 2}
+                value={selectedObject.strokeWidth || 6}
                 onChange={(e) => onObjectUpdate({ strokeWidth: parseInt(e.target.value) })}
                 style={{ width: '100%' }}
               />
               <div style={{ textAlign: 'center', fontSize: '12px', color: '#666', marginTop: '4px' }}>
-                {selectedObject.strokeWidth || 2}px
+                {selectedObject.strokeWidth || 6}px
               </div>
             </div>
 
