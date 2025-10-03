@@ -2,7 +2,11 @@ import React, { useState } from 'react';
 import { Settings, Layers } from 'lucide-react';
 import { AnnotationObject } from '../types';
 import LayerPanel from './LayerPanel';
-import PropertiesPanel from './PropertiesPanel';
+// 原来的导入
+// import PropertiesPanel from './PropertiesPanel';
+
+// 替换为重构后的组件
+import PropertiesPanel from './PropertiesPanelRefactored';
 
 interface RightPanelProps {
   objects: AnnotationObject[];
