@@ -117,6 +117,14 @@ const CanvasObjects: React.FC<CanvasObjectsProps> = ({
           width: Math.max(50, (obj.width || 0) * scaleX),
           height: Math.max(50, (obj.height || 0) * scaleY),
         });
+      } else if (obj.type === 'image') {
+        // 贴图工具变换处理
+        onObjectUpdate(id, {
+          x: node.x(),
+          y: node.y(),
+          width: Math.max(20, (obj.width || 0) * scaleX),
+          height: Math.max(20, (obj.height || 0) * scaleY),
+        });
       }
     }
   };
