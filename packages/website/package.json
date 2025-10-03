@@ -1,0 +1,25 @@
+{
+  "name": "@annotation/website",
+  "version": "1.0.0",
+  "description": "图片标注系统文档网站",
+  "type": "module",
+  "scripts": {
+    "dev": "rspress dev",
+    "build": "rspress build",
+    "preview": "rspress preview"
+  },
+  "devDependencies": {
+    "@rspress/core": "^1.45.6",
+    "@rspress/theme-default": "^1.45.6"
+  },
+  "keywords": [
+    "documentation",
+    "rspress",
+    "annotation"
+  ],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "rspress": "^1.45.6"
+  }
+}

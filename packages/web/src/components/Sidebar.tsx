@@ -18,7 +18,6 @@ interface SidebarProps {
   selectedTool: ToolType;
   onToolSelect: (tool: ToolType) => void;
 }
-
 const toolCategories = [
   {
     title: '基础',

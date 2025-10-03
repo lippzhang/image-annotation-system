@@ -1,42 +1,73 @@
 # 轻量级图片标注系统
 
-基于 React 18 + KonvaJS + Rsbuild + pnpm10 + monorepo 构建的轻量级图片标注工具。
+基于 React 18 + KonvaJS + Rsbuild + TypeScript 构建的现代化图片标注工具。
 
 ## 功能特性
 
-- 🎨 **丰富的标注工具**: 文字、矩形、圆形、箭头、直线、画笔等
-- 🖱️ **直观的操作**: 拖拽、缩放、旋转等交互操作
-- 📐 **精确测量**: 支持尺寸标注和角度测量
-- 🎯 **属性编辑**: 实时编辑图形属性（颜色、大小、位置等）
-- 💾 **导出功能**: 支持多种格式导出
-- 🔍 **缩放控制**: 灵活的画布缩放和平移
-- 📱 **响应式设计**: 适配不同屏幕尺寸
+### 🎨 丰富的标注工具
+
+- **基础工具**: 文字、矩形、圆形、直线、箭头、手写笔、步骤标记
+- **高级工具**: 贴图、马赛克、渐变背景
+- **智能编辑**: 支持拖拽、缩放、旋转等交互操作
+
+### 🎯 强大的编辑功能
+
+- **实时属性编辑**: 颜色、大小、位置、透明度等
+- **图层管理**: 完整的图层系统，支持显示/隐藏、锁定/解锁、层级调整
+- **精确控制**: 像素级精度的位置和尺寸调整
+- **批量操作**: 多选、复制、删除等批量编辑功能
+
+### 🖼️ 图片处理
+
+- **多格式支持**: 支持 JPG、PNG、GIF、WebP 等常见图片格式
+- **贴图功能**: 支持添加自定义图片贴图，可调整大小和位置
+- **马赛克工具**: 可调节像素大小和透明度的马赛克效果
+- **渐变背景**: 支持水平、垂直、对角线渐变，自定义颜色
+
+### 🔧 用户体验
+
+- **直观操作**: 所见即所得的编辑体验
+- **响应式设计**: 适配不同屏幕尺寸
+- **快捷键支持**: 提高编辑效率
+- **实时预览**: 编辑过程中实时查看效果
 
 ## 技术栈
 
-- **前端框架**: React 18
-- **画布渲染**: KonvaJS + React-Konva
+- **前端框架**: React 18 + TypeScript
+- **画布渲染**: Konva.js + React-Konva
 - **构建工具**: Rsbuild
-- **包管理**: pnpm 10
-- **项目结构**: Monorepo
-- **开发语言**: TypeScript
-- **图标库**: Lucide React
+- **UI 组件**: Ant Design 5.x
+- **图标库**: Lucide React + Ant Design Icons
+- **包管理**: pnpm
+- **开发语言**: TypeScript 5.x
 
 ## 项目结构
 
 ```
 image-annotation-system/
-├── packages/
-│   └── web/                 # 前端应用
-│       ├── src/
-│       │   ├── components/  # React 组件
-│       │   ├── types/       # TypeScript 类型定义
-│       │   ├── utils/       # 工具函数
-│       │   └── styles/      # 样式文件
-│       ├── public/          # 静态资源
-│       └── package.json
-├── package.json             # 根包配置
-├── pnpm-workspace.yaml     # pnpm 工作空间配置
+├── src/
+│   ├── components/          # React 组件
+│   │   ├── AnnotationEditor.tsx    # 主编辑器
+│   │   ├── Toolbar.tsx            # 顶部工具栏
+│   │   ├── Sidebar.tsx            # 左侧工具面板
+│   │   ├── PropertiesPanel.tsx    # 右侧属性面板
+│   │   ├── LayerPanel.tsx         # 图层管理面板
+│   │   ├── CanvasObjects.tsx      # 画布对象渲染
+│   │   ├── RightPanel.tsx         # 右侧面板容器
+│   │   └── ...
+│   ├── types/               # TypeScript 类型定义
+│   │   └── index.ts        # 核心类型定义
+│   ├── utils/               # 工具函数
+│   │   ├── helpers.ts      # 通用工具函数
+│   │   ├── layerUtils.ts   # 图层管理工具
+│   │   └── imageUtils.ts   # 图片处理工具
+│   ├── App.tsx             # 应用根组件
+│   └── main.tsx            # 应用入口
+├── public/                  # 静态资源
+├── dist/                   # 构建输出目录
+├── package.json            # 项目配置
+├── rsbuild.config.ts       # Rsbuild 配置
+├── tsconfig.json           # TypeScript 配置
 └── README.md
 ```
 
@@ -61,7 +92,7 @@ pnpm install
 pnpm dev
 ```
 
-访问 http://localhost:3000 查看应用。
+访问 <http://localhost:3000> 查看应用。
 
 ### 构建生产版本
 
@@ -80,18 +111,23 @@ pnpm preview
 ## 主要组件
 
 ### AnnotationEditor
+
 主编辑器组件，管理整个应用的状态和交互逻辑。
 
 ### Toolbar
+
 顶部工具栏，包含常用操作按钮和缩放控制。
 
 ### Sidebar
+
 左侧工具面板，提供各种标注工具的选择。
 
 ### PropertiesPanel
+
 右侧属性面板，用于编辑选中图形的属性。
 
 ### CanvasObjects
+
 画布对象渲染组件，负责渲染各种标注图形。
 
 ## 使用说明
