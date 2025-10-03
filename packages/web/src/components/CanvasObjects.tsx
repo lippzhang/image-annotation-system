@@ -1,7 +1,8 @@
-import React, { useRef, useEffect } from 'react';
+import React, { useRef, useEffect, useState } from 'react';
 import { Rect, Circle, Line, Text, Arrow, Group, Transformer } from 'react-konva';
 import { AnnotationObject } from '../types';
 import Konva from 'konva';
+import TextEditor from './TextEditor';
 
 interface CanvasObjectsProps {
   objects: AnnotationObject[];
@@ -18,22 +19,24 @@ const CanvasObjects: React.FC<CanvasObjectsProps> = ({
 }) => {
   const transformerRef = useRef<Konva.Transformer>(null);
   const shapeRefs = useRef<{ [key: string]: Konva.Node }>({});
+  const [editingTextId, setEditingTextId] = useState<string | null>(null);
 
   // 当选中对象改变时，更新Transformer
   useEffect(() => {
     if (transformerRef.current) {
-      // 只对未锁定的选中对象应用 Transformer
+      // 只对未锁定且未在编辑状态的选中对象应用 Transformer
       const selectedNodes = selectedObjects
         .map(id => {
           const obj = objects.find(o => o.id === id);
-          return obj && !obj.locked ? shapeRefs.current[id] : null;
+          // 排除锁定的对象和正在编辑的文本对象
+          return obj && !obj.locked && editingTextId !== id ? shapeRefs.current[id] : null;
         })
         .filter((node): node is Konva.Node => node !== null);
       
       transformerRef.current.nodes(selectedNodes);
       transformerRef.current.getLayer()?.batchDraw();
     }
-  }, [selectedObjects, objects]);
+  }, [selectedObjects, objects, editingTextId]); // 添加 editingTextId 依赖
 
   const handleDragEnd = (id: string, e: any) => {
     const obj = objects.find(o => o.id === id);
@@ -50,7 +53,7 @@ const CanvasObjects: React.FC<CanvasObjectsProps> = ({
 
   const handleTransformEnd = (id: string, e: any) => {
     const obj = objects.find(o => o.id === id);
-    if (obj?.locked) return; // 锁定的对象不能变换
+    if (obj?.locked || editingTextId === id) return; // 锁定的对象或正在编辑的对象不能变换
     
     if (onObjectUpdate) {
       const node = e.target;
@@ -79,10 +82,15 @@ const CanvasObjects: React.FC<CanvasObjectsProps> = ({
           height: newRadius * 2,
         });
       } else if (obj.type === 'text') {
+        // 优化文本变换处理
+        const newFontSize = Math.max(8, Math.round((obj.fontSize || 40) * Math.max(scaleX, scaleY)));
         onObjectUpdate(id, {
           x: node.x(),
           y: node.y(),
-          fontSize: Math.max(8, Math.round((obj.fontSize || 40) * Math.max(scaleX, scaleY))),
+          fontSize: newFontSize,
+          // 保持文本的宽度和高度同步更新
+          width: (obj.width || 0) * scaleX,
+          height: (obj.height || 0) * scaleY,
         });
       }
     }
@@ -93,11 +101,38 @@ const CanvasObjects: React.FC<CanvasObjectsProps> = ({
     onObjectSelect(obj.id);
   };
 
+  // 处理文本双击编辑
+  const handleTextDoubleClick = (obj: AnnotationObject) => {
+    if (obj.type === 'text' && !obj.locked) {
+      // 确保清除之前的编辑状态
+      setEditingTextId(null);
+      // 延迟设置新的编辑状态，确保组件重新渲染
+      setTimeout(() => {
+        setEditingTextId(obj.id);
+      }, 10);
+    }
+  };
+
+  // 处理文本编辑完成
+  const handleTextChange = (id: string, newText: string) => {
+    if (onObjectUpdate) {
+      onObjectUpdate(id, { text: newText });
+    }
+    setEditingTextId(null);
+  };
+
+  // 处理文本编辑取消
+  const handleTextEditClose = () => {
+    setEditingTextId(null);
+  };
+
   const renderObject = (obj: AnnotationObject) => {
     // 如果对象不可见，不渲染
     if (obj.visible === false) return null;
     
     const isLocked = obj.locked;
+    const isEditing = editingTextId === obj.id;
+    
     const commonProps = {
       x: obj.x,
       y: obj.y,
@@ -256,15 +291,28 @@ const CanvasObjects: React.FC<CanvasObjectsProps> = ({
 
       case 'text':
         return (
-          <Text
-            key={obj.id}
-            {...commonProps}
-            text={obj.text || '文本'}
-            fontSize={obj.fontSize || 40}
-            fontFamily={obj.fontFamily || 'Arial'}
-            fill={obj.fill || '#333'}
-            stroke={undefined}
-          />
+          <React.Fragment key={obj.id}>
+            <Text
+              {...commonProps}
+              text={obj.text || '文本'}
+              fontSize={obj.fontSize || 40}
+              fontFamily={obj.fontFamily || 'Arial'}
+              fill={obj.fill || '#333'}
+              stroke={undefined}
+              visible={!isEditing} // 编辑时隐藏文本
+              onDblClick={() => handleTextDoubleClick(obj)}
+              onDblTap={() => handleTextDoubleClick(obj)}
+              // 确保文本对象可以被 Transformer 正确处理
+              perfectDrawEnabled={false}
+            />
+            {isEditing && shapeRefs.current[obj.id] && (
+              <TextEditor
+                textNode={shapeRefs.current[obj.id] as Konva.Text}
+                onTextChange={(newText) => handleTextChange(obj.id, newText)}
+                onClose={handleTextEditClose}
+              />
+            )}
+          </React.Fragment>
         );
 
       default:
